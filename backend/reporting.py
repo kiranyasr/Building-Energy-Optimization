@@ -85,18 +85,15 @@ def compile_final_report():
     }
     
     # b. Feature Importances from the best model (Optimized XGBoost)
-    # Ensure the model path exists before loading
     if "XGBoost (Optimized)" not in model_paths or not os.path.exists(model_paths["XGBoost (Optimized)"]):
         return {"error": "Optimized XGBoost model not found for feature importance analysis."}
         
     best_model = load(model_paths["XGBoost (Optimized)"])
     importances = best_model.feature_importances_
     
-    # Handle cases where feature_names might not be immediately available (e.g., if using a pure-sklearn wrapper)
     try:
         feature_names = best_model.get_booster().feature_names
     except AttributeError:
-        # Fallback to feature names from the input data if the booster object isn't directly accessible
         feature_names = X_test.columns.tolist() 
 
     importance_data = sorted(zip(feature_names, importances), key=lambda x: x[1], reverse=True)[:10]
@@ -107,10 +104,9 @@ def compile_final_report():
             "accuracy_comparison": chart_data,
             "feature_importance": {
                 "features": [x[0] for x in importance_data],
-                # FIX: Convert NumPy floats (x[1]) to standard Python floats for JSON serialization
-                "scores": [float(x[1]) for x in importance_data] 
+                "scores": [float(x[1]) for x in importance_data]  # convert NumPy floats to standard floats
             }
         }
     }
     
-    return responsegit remote add origin https://github.com/username/repo-name.git
+    return response
