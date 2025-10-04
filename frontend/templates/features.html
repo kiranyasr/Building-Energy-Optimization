@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Engineering | Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/features.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">1. Upload Data</a></li>
+                    <li><a href="/clean">2. Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">3. Fluctuation Analysis</a></li>
+                    <li class="active"><a href="/features">4. Feature Engineering</a></li>
+                    <li><a href="/selection">5. Feature Selection</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>Feature Engineering</h2>
+                <p>Generating new features from existing data to improve model performance.</p>
+            </header>
+            
+            <div class="action-card">
+                <p>Click the button to generate time-series, cyclical, and contextual features from the cleaned dataset. A sample of the resulting data will be displayed below.</p>
+                <button id="feature-btn" class="action-btn">
+                    Generate Engineered Features
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <div id="results-section" class="hidden">
+                <section class="explanation-section">
+                    <h3>Generated Feature Logic</h3>
+                    <ul id="feature-explanation-list"></ul>
+                </section>
+
+                <section class="table-section">
+                    <h3>Engineered Data Sample</h3>
+                    <div class="table-container">
+                        <table id="features-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+                
+                <section class="next-step">
+                     <a href="/selection" class="action-btn">Proceed to Feature Selection &rarr;</a>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const featureBtn = document.getElementById('feature-btn');
+        const resultsSection = document.getElementById('results-section');
+        const explanationList = document.getElementById('feature-explanation-list');
+        const featuresTable = document.getElementById('features-table');
+        const nextStepSection = document.querySelector('.next-step');
+
+        featureBtn.addEventListener('click', async () => {
+            setLoading(true);
+            resultsSection.classList.add('hidden');
+
+            try {
+                const response = await fetch('/get_engineered_features', { method: 'POST' });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'An unknown error occurred.');
+                }
+                
+                displayResults(result);
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function displayResults(data) {
+            // Populate explanations
+            explanationList.innerHTML = '';
+            for (const [feature, description] of Object.entries(data.features_explained)) {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${feature}:</strong> ${description}`;
+                explanationList.appendChild(li);
+            }
+
+            // Populate table
+            const thead = featuresTable.querySelector('thead');
+            const tbody = featuresTable.querySelector('tbody');
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            const headerRow = document.createElement('tr');
+            data.sample_data.columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            data.sample_data.data.forEach(rowData => {
+                const row = document.createElement('tr');
+                rowData.forEach(cellData => {
+                    const td = document.createElement('td');
+                    td.textContent = cellData;
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            });
+
+            resultsSection.classList.remove('hidden');
+            nextStepSection.style.display = 'block';
+        }
+
+        function setLoading(isLoading) {
+            featureBtn.classList.toggle('loading', isLoading);
+            featureBtn.disabled = isLoading;
+        }
+    });
+    </script>
+</body>
+</html>

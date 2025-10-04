@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Data | Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/clean.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">1. Upload Data</a></li>
+                    <li class="active"><a href="/clean">2. Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">3. Fluctuation Analysis</a></li>
+                    <li><a href="/features">4. Feature Engineering</a></li>
+                    <li><a href="/selection">5. Feature Selection</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>Clean & Preprocess Data</h2>
+                <p>Review the automated cleaning results and proceed to the next step.</p>
+            </header>
+            
+            <div class="action-card">
+                <p>Click the button to analyze the uploaded dataset for issues like missing values, duplicates, and outliers. The system will automatically apply fixes.</p>
+                <button id="clean-btn" class="action-btn">
+                    Analyze & Clean Data
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <section id="summary-section" class="hidden">
+                <h3>Cleaning Summary</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h4>Missing Values Fixed</h4>
+                        <p id="missing-values">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Duplicate Rows Removed</h4>
+                        <p id="duplicates">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Outliers Flagged</h4>
+                        <p id="outliers-flagged">-</p>
+                    </div>
+                </div>
+                <div id="outlier-details" class="outlier-details">
+                    <h4>Outlier Details by Column:</h4>
+                    <ul id="outlier-list"></ul>
+                </div>
+                
+                <div id="next-step-section" class="next-step">
+                    <p>Preprocessing complete. You can now proceed to fluctuation analysis.</p>
+                    <a href="/fluctuations" class="action-btn">Analyze Fluctuations &rarr;</a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cleanBtn = document.getElementById('clean-btn');
+        const summarySection = document.getElementById('summary-section');
+        
+        // Stat display elements
+        const missingValuesEl = document.getElementById('missing-values');
+        const duplicatesEl = document.getElementById('duplicates');
+        const outliersFlaggedEl = document.getElementById('outliers-flagged');
+        const outlierListEl = document.getElementById('outlier-list');
+        const nextStepSection = document.getElementById('next-step-section');
+
+        cleanBtn.addEventListener('click', async () => {
+            setLoading(true);
+
+            try {
+                const response = await fetch('/perform_cleaning', { method: 'POST' });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'An unknown server error occurred.');
+                }
+                
+                displaySummary(result);
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function displaySummary(data) {
+            missingValuesEl.textContent = data.missing_values_fixed.toLocaleString();
+            duplicatesEl.textContent = data.duplicates_removed.toLocaleString();
+            outliersFlaggedEl.textContent = data.total_outliers_flagged.toLocaleString();
+            
+            outlierListEl.innerHTML = ''; // Clear previous list
+            if (Object.keys(data.outliers_found).length > 0) {
+                for (const [column, count] of Object.entries(data.outliers_found)) {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${column}:</strong> ${count.toLocaleString()} outliers`;
+                    outlierListEl.appendChild(li);
+                }
+                 document.getElementById('outlier-details').style.display = 'block';
+            } else {
+                 document.getElementById('outlier-details').style.display = 'none';
+            }
+
+            summarySection.classList.remove('hidden');
+            nextStepSection.style.display = 'block';
+        }
+
+        function setLoading(isLoading) {
+            cleanBtn.classList.toggle('loading', isLoading);
+            cleanBtn.disabled = isLoading;
+        }
+    });
+    </script>
+</body>
+</html>

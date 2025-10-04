@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Selection | Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/selection.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">1. Upload Data</a></li>
+                    <li><a href="/clean">2. Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">3. Fluctuation Analysis</a></li>
+                    <li><a href="/features">4. Feature Engineering</a></li>
+                    <li class="active"><a href="/selection">5. Feature Selection</a></li>
+                    <li><a href="/models">6. Baseline Models</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>Feature Selection & Reduction</h2>
+                <p>Identifying the most predictive features for model training.</p>
+            </header>
+            
+            <div class="action-card">
+                <p>Click the button to run feature selection algorithms (Random Forest) and dimensionality reduction techniques (PCA) on the engineered dataset.</p>
+                <button id="selection-btn" class="action-btn">
+                    Run Selection & Reduction
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <div id="results-section" class="hidden">
+                <section class="chart-container">
+                    <h3>Top 20 Features by Importance (Random Forest)</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="importanceChart"></canvas>
+                    </div>
+                </section>
+
+                <section class="chart-container">
+                    <h3>2D PCA of Feature Space</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="pcaChart"></canvas>
+                    </div>
+                </section>
+                
+                <section class="recommendation-card">
+                    <h3>Recommended Final Feature Set</h3>
+                    <p id="justification-text"></p>
+                    <ul id="recommended-list"></ul>
+                    <div class="next-step">
+                         <a href="/models" class="action-btn">Proceed to Baseline Modelling &rarr;</a>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const selectionBtn = document.getElementById('selection-btn');
+        const resultsSection = document.getElementById('results-section');
+        const nextStepSection = document.querySelector('.next-step');
+
+        selectionBtn.addEventListener('click', async () => {
+            setLoading(true);
+            resultsSection.classList.add('hidden');
+
+            try {
+                const response = await fetch('/get_selection_data', { method: 'POST' });
+                const result = await response.json();
+
+                if (!response.ok) { throw new Error(result.error); }
+                
+                displayResults(result);
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function displayResults(data) {
+            createImportanceChart(data.rf_importances);
+            createPcaChart(data.pca_2d_visualization);
+            populateRecommendations(data.recommended_set, data.justification);
+            resultsSection.classList.remove('hidden');
+            nextStepSection.style.display = 'block';
+        }
+
+        function createImportanceChart(importanceData) {
+            const ctx = document.getElementById('importanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: importanceData.features,
+                    datasets: [{
+                        label: 'Importance Score',
+                        data: importanceData.scores,
+                        backgroundColor: '#9C27B0',
+                        borderColor: '#7B1FA2',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { ticks: { color: '#E0E0E0' } },
+                        x: { ticks: { color: '#E0E0E0' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function createPcaChart(pcaData) {
+            const ctx = document.getElementById('pcaChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Data Point',
+                        data: pcaData.x.map((val, i) => ({ x: val, y: pcaData.y[i] })),
+                        backgroundColor: 'rgba(0, 170, 255, 0.6)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Principal Component 1', color: '#E0E0E0'}, ticks: { color: '#E0E0E0' } },
+                        y: { title: { display: true, text: 'Principal Component 2', color: '#E0E0E0' }, ticks: { color: '#E0E0E0' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        
+        function populateRecommendations(features, justification) {
+            document.getElementById('justification-text').textContent = justification;
+            const list = document.getElementById('recommended-list');
+            list.innerHTML = '';
+            features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                list.appendChild(li);
+            });
+        }
+
+        function setLoading(isLoading) {
+            selectionBtn.classList.toggle('loading', isLoading);
+            selectionBtn.disabled = isLoading;
+        }
+    });
+    </script>
+</body>
+</html>

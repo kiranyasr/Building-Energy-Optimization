@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wastage Analysis | Energy Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/wastage.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">1. Upload Data</a></li>
+                    <li><a href="/clean">2. Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">3. Fluctuation Analysis</a></li>
+                    <li><a href="/features">4. Feature Engineering</a></li>
+                    <li><a href="/selection">5. Feature Selection</a></li>
+                    <li><a href="/models">6. Baseline Models</a></li>
+                    <li><a href="/deep_learning">7. Deep Learning</a></li>
+                    <li><a href="/optimization">8. Optimization</a></li>
+                    <li><a href="/anomalies">9. Anomaly Detection</a></li>
+                    <li class="active"><a href="/wastage">10. Wastage Analysis</a></li>
+                    <li><a href="/comparison">11. Final Report</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>Energy Wastage & Usage Insights</h2>
+                <p>Turning data analysis into actionable operational improvements.</p>
+            </header>
+            
+            <div class="action-card">
+                <p>Click to analyze the full dataset for energy wastage patterns, classify usage periods, and generate actionable recommendations.</p>
+                <button id="analyze-btn" class="action-btn">
+                    Generate Insights
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <div id="results-section" class="hidden">
+                <section class="kpi-grid">
+                    <div class="kpi-card">
+                        <h3>Top Wasted Days</h3>
+                        <ul id="top-wasted-days"></ul>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>High-Use Hours</h3>
+                        <p id="high-use-hours" class="hour-display"></p>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Lowest-Use Hours</h3>
+                        <p id="low-use-hours" class="hour-display"></p>
+                    </div>
+                </section>
+                
+                <section class="insights-card">
+                    <h3>Actionable Insights</h3>
+                    <ul id="insights-list"></ul>
+                </section>
+
+                <section class="next-step">
+                    <p>Wastage analysis is complete. You can now view the final project summary.</p>
+                    <a href="/comparison" class="action-btn">View Final Report &rarr;</a>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const resultsSection = document.getElementById('results-section');
+        const nextStepSection = document.querySelector('.next-step');
+
+        analyzeBtn.addEventListener('click', async () => {
+            setLoading(true);
+            resultsSection.classList.add('hidden');
+            if(nextStepSection) nextStepSection.style.display = 'none';
+
+            try {
+                const response = await fetch('/run_wastage_analysis', { method: 'POST' });
+                const result = await response.json();
+                if (!response.ok || result.error) { throw new Error(result.error); }
+                displayResults(result);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function displayResults(data) {
+            // Populate KPIs
+            const wastedList = document.getElementById('top-wasted-days');
+            wastedList.innerHTML = '';
+            for (const [date, value] of Object.entries(data.kpis.top_wasted_days)) {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${date}</span> <strong>${Math.round(value)} kWh</strong>`;
+                wastedList.appendChild(li);
+            }
+            
+            document.getElementById('high-use-hours').textContent = data.kpis.high_use_hours.join(', ') || 'N/A';
+            document.getElementById('low-use-hours').textContent = data.kpis.low_use_hours.join(', ') || 'N/A';
+            
+            // Populate Insights
+            const insightsList = document.getElementById('insights-list');
+            insightsList.innerHTML = '';
+            data.insights.forEach(insight => {
+                const li = document.createElement('li');
+                li.textContent = insight;
+                insightsList.appendChild(li);
+            });
+
+            resultsSection.classList.remove('hidden');
+            if(nextStepSection) nextStepSection.style.display = 'block';
+        }
+
+        function setLoading(isLoading) {
+            analyzeBtn.classList.toggle('loading', isLoading);
+            analyzeBtn.disabled = isLoading;
+        }
+    });
+    </script>
+</body>
+</html>

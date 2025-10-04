@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Detection | Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/anomalies.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">1. Upload Data</a></li>
+                    <li><a href="/clean">2. Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">3. Fluctuation Analysis</a></li>
+                    <li><a href="/features">4. Feature Engineering</a></li>
+                    <li><a href="/selection">5. Feature Selection</a></li>
+                    <li><a href="/models">6. Baseline Models</a></li>
+                    <li><a href="/deep_learning">7. Deep Learning</a></li>
+                    <li><a href="/optimization">8. Optimization</a></li>
+                    <li class="active"><a href="/anomalies">9. Anomaly Detection</a></li>
+                    <li><a href="/wastage">10. Wastage Analysis</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>Anomaly Detection Dashboard</h2>
+                <p>Using model residuals to identify unexpected spikes and dips in energy consumption.</p>
+            </header>
+            
+            <div class="action-card">
+                <p>Click to use the final optimized model to find anomalies in the entire dataset. Results will be visualized below.</p>
+                <button id="anomaly-btn" class="action-btn">
+                    Detect Anomalies
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <div id="results-section" class="hidden">
+                <section class="chart-container">
+                    <h3>Residuals Over Time (Anomalies Highlighted)</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="residualsChart"></canvas>
+                    </div>
+                </section>
+
+                <div class="grid-container">
+                    <section class="table-container">
+                        <h3>Anomaly Log (Most Recent 100)</h3>
+                        <div class="table-wrapper">
+                            <table id="anomaly-table">
+                                <thead>
+                                    <tr><th>Timestamp</th><th>Residual (kWh)</th><th>Anomaly Type</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="heatmap-container">
+                        <h3>Daily Anomaly Severity</h3>
+                        <div id="heatmap" class="heatmap-grid"></div>
+                    </section>
+                </div>
+
+                <section class="next-step">
+                    <p>Anomaly detection is complete. Proceed to the final insights page.</p>
+                    <a href="/wastage" class="action-btn">Go to Wastage Analysis &rarr;</a>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const anomalyBtn = document.getElementById('anomaly-btn');
+        const resultsSection = document.getElementById('results-section');
+        const nextStepSection = document.querySelector('.next-step');
+
+        anomalyBtn.addEventListener('click', async () => {
+            setLoading(true);
+            resultsSection.classList.add('hidden');
+            nextStepSection.style.display = 'none';
+
+            try {
+                const response = await fetch('/run_anomaly_detection', { method: 'POST' });
+                const result = await response.json();
+                if (!response.ok || result.error) { throw new Error(result.error); }
+                displayResults(result);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function displayResults(data) {
+            createResidualsChart(data.residual_plot);
+            createHeatmap(data.heatmap_data);
+            populateAnomalyTable(data.anomaly_table);
+            resultsSection.classList.remove('hidden');
+            nextStepSection.style.display = 'block'; 
+        }
+
+        function createResidualsChart(plotData) {
+            const canvas = document.getElementById('residualsChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const anomalyPoints = plotData.anomalies.map(p => ({ x: new Date(p.Timestamp), y: p.residual }));
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: plotData.labels.map(l => new Date(l)),
+                    datasets: [
+                        { label: 'Residuals', data: plotData.residuals, borderColor: '#00BFFF', borderWidth: 1, pointRadius: 0 },
+                        { label: 'Anomalies', data: anomalyPoints, type: 'scatter', backgroundColor: '#FF6384', radius: 5 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month' } } } }
+            });
+        }
+        
+        function populateAnomalyTable(tableData) {
+            const tbody = document.getElementById('anomaly-table').querySelector('tbody');
+            tbody.innerHTML = '';
+            tableData.forEach(row => {
+                const tr = tbody.insertRow();
+                const typeClass = row.anomaly_type === 'Spike' ? 'good' : 'bad';
+                tr.innerHTML = `
+                    <td>${new Date(row.Timestamp).toLocaleString()}</td>
+                    <td>${row.residual.toFixed(2)}</td>
+                    <td class="${typeClass}">${row.anomaly_type}</td>
+                `;
+            });
+        }
+
+        function createHeatmap(heatmapData) {
+            const grid = document.getElementById('heatmap');
+            grid.innerHTML = ''; 
+            heatmapData.sort((a, b) => b.severity - a.severity);
+            const topDays = heatmapData.slice(0, 10);
+
+            const header = document.createElement('h4');
+            header.textContent = "Top 10 Most Anomalous Days";
+            grid.appendChild(header);
+
+            const list = document.createElement('ul');
+            topDays.forEach(day => {
+                const li = document.createElement('li');
+                li.textContent = `${day.date}: Severity Score ${day.severity.toFixed(0)}`;
+                list.appendChild(li);
+            });
+            grid.appendChild(list);
+        }
+
+        function setLoading(isLoading) {
+            anomalyBtn.classList.toggle('loading', isLoading);
+            anomalyBtn.disabled = isLoading;
+        }
+    });
+    </script>
+</body>
+</html>

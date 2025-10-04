@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluctuation Analysis | Energy Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fluctuations.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">1. Upload Data</a></li>
+                    <li><a href="/clean">2. Clean & Preprocess</a></li>
+                    <li class="active"><a href="/fluctuations">3. Fluctuation Analysis</a></li>
+                    <li><a href="/features">4. Feature Engineering</a></li>
+                    <li><a href="/selection">5. Feature Selection</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>Fluctuation Dashboard</h2>
+                <p>Visualizing energy consumption volatility and trends over time.</p>
+            </header>
+
+            <div id="loader" class="loader-container">
+                <div class="spinner"></div>
+                <p>Analyzing fluctuations... this may take a moment.</p>
+            </div>
+
+            <div id="dashboard-content" class="hidden">
+                <section class="kpi-grid">
+                    <div class="kpi-card">
+                        <h4>Current Volatility Index</h4>
+                        <p id="current-volatility">-</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h4>Average Volatility (1Y)</h4>
+                        <p id="avg-volatility">-</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h4>Avg. Daily Consumption</h4>
+                        <p id="avg-daily-consumption">-</p>
+                    </div>
+                </section>
+
+                <section class="chart-grid">
+                    <div class="chart-container">
+                        <h3>Hourly Consumption % Change (1Y)</h3>
+                        <canvas id="pctChangeChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Rolling Standard Deviation (Volatility)</h3>
+                        <canvas id="rollingStdChart"></canvas>
+                    </div>
+                    <div class="chart-container full-width">
+                        <h3>Aggregated Consumption</h3>
+                        <canvas id="aggregatesChart"></canvas>
+                    </div>
+                </section>
+                
+                <section id="next-step-section" class="next-step">
+                     <a href="/features" class="action-btn">Proceed to Feature Engineering &rarr;</a>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const loader = document.getElementById('loader');
+        const dashboardContent = document.getElementById('dashboard-content');
+        const nextStepSection = document.getElementById('next-step-section');
+        const charts = {}; // To hold chart instances
+
+        async function fetchDataAndRender() {
+            try {
+                const response = await fetch('/get_fluctuation_data', { method: 'POST' });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to fetch fluctuation data.');
+                }
+
+                populateKPIs(result.kpis);
+                createCharts(result.charts);
+                
+                loader.style.display = 'none';
+                dashboardContent.classList.remove('hidden');
+                nextStepSection.style.display = 'block';
+
+            } catch (error) {
+                loader.innerHTML = `<p style="color: #ff4d4d;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function populateKPIs(kpis) {
+            document.getElementById('current-volatility').textContent = kpis.current_volatility;
+            document.getElementById('avg-volatility').textContent = kpis.avg_volatility;
+            document.getElementById('avg-daily-consumption').textContent = `${kpis.avg_daily_consumption} kWh`;
+        }
+        
+        function createCharts(chartData) {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#E0E0E0' } } },
+                scales: {
+                    x: { ticks: { color: '#E0E0E0' }, grid: { color: '#444' } },
+                    y: { ticks: { color: '#E0E0E0' }, grid: { color: '#444' } }
+                }
+            };
+            
+            // % Change Chart
+            new Chart(document.getElementById('pctChangeChart'), {
+                type: 'line',
+                data: {
+                    labels: chartData.pct_change.labels,
+                    datasets: [{
+                        label: '% Change',
+                        data: chartData.pct_change.data,
+                        borderColor: '#00aaff',
+                        backgroundColor: 'rgba(0, 170, 255, 0.1)',
+                        fill: true,
+                        borderWidth: 1,
+                        pointRadius: 0
+                    }]
+                },
+                options: chartOptions
+            });
+
+            // Rolling Std Chart
+            new Chart(document.getElementById('rollingStdChart'), {
+                type: 'line',
+                data: {
+                    labels: chartData.rolling_std.labels,
+                    datasets: [
+                        {
+                            label: '24-Hour Rolling Std',
+                            data: chartData.rolling_std.data_24h,
+                            borderColor: '#00ffaa',
+                            borderWidth: 1.5,
+                            pointRadius: 0
+                        },
+                        {
+                            label: '7-Day Rolling Std',
+                            data: chartData.rolling_std.data_7d,
+                            borderColor: '#ff4d4d',
+                            borderWidth: 1.5,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: chartOptions
+            });
+
+            // Aggregates Chart
+            new Chart(document.getElementById('aggregatesChart'), {
+                type: 'line',
+                data: {
+                    labels: chartData.aggregates.daily.labels,
+                    datasets: [
+                        {
+                            label: 'Daily Average',
+                            data: chartData.aggregates.daily.data,
+                            borderColor: '#9C27B0',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                        },
+                        {
+                            label: 'Weekly Average',
+                            data: chartData.aggregates.weekly.data,
+                            borderColor: '#ffeb3b',
+                            borderWidth: 2.5,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                         x: { type: 'time', time: { unit: 'month'}, ticks: { color: '#E0E0E0' }, grid: { color: '#444' } },
+                         y: { ticks: { color: '#E0E0E0' }, grid: { color: '#444' } }
+                    }
+                }
+            });
+        }
+
+        fetchDataAndRender();
+    });
+    </script>
+</body>
+</html>

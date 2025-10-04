@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baseline Models | Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/models.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">1. Upload Data</a></li>
+                    <li><a href="/clean">2. Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">3. Fluctuation Analysis</a></li>
+                    <li><a href="/features">4. Feature Engineering</a></li>
+                    <li><a href="/selection">5. Feature Selection</a></li>
+                    <li class="active"><a href="/models">6. Baseline Models</a></li>
+                    <li><a href="/deep_learning">7. Deep Learning</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>Baseline Model Performance</h2>
+                <p>Training and evaluating standard ML models on the final feature set.</p>
+            </header>
+            
+            <div class="action-card">
+                <p>Click the button to train models for all energy-related targets and visualize their performance on the test data.</p>
+                <button id="train-btn" class="action-btn">
+                    Train All Models
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <div id="results-section" class="hidden">
+                <div class="controls-container">
+                    <label for="target-selector">Select Target to View:</label>
+                    <select id="target-selector"></select>
+                </div>
+
+                <section class="results-table-container">
+                    <h3>Model Comparison</h3>
+                    <table id="metrics-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>MAE</th>
+                                <th>RMSE</th>
+                                <th>R² Score</th>
+                                <th>Training Time</th>
+                                <th>Model Size</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </section>
+                
+                <section class="chart-container">
+                    <h3>Actual vs. Predicted (Test Set)</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="predictionsChart"></canvas>
+                    </div>
+                </section>
+
+                <section class="next-step">
+                    <p>Baseline modeling complete. You can now proceed to train advanced models.</p>
+                    <a href="/deep_learning" class="action-btn">Proceed to Deep Learning &rarr;</a>
+                </section>
+                </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const trainBtn = document.getElementById('train-btn');
+        const resultsSection = document.getElementById('results-section');
+        const targetSelector = document.getElementById('target-selector');
+        const nextStepSection = document.querySelector('.next-step'); // Get the new section
+        let predictionsChart;
+        let fullData; 
+
+        trainBtn.addEventListener('click', async () => {
+            setLoading(true);
+            resultsSection.classList.add('hidden');
+            nextStepSection.style.display = 'none'; // Hide button on new run
+
+            try {
+                const response = await fetch('/run_baseline_models', { method: 'POST' });
+                fullData = await response.json();
+
+                if (!response.ok || fullData.error) { 
+                    throw new Error(fullData.error || 'An unknown server error occurred.'); 
+                }
+                
+                populateTargetSelector(Object.keys(fullData));
+                updateDashboard(Object.keys(fullData)[0]);
+                resultsSection.classList.remove('hidden');
+                nextStepSection.style.display = 'block'; // <-- SHOW THE PROCEED BUTTON
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        targetSelector.addEventListener('change', (e) => {
+            updateDashboard(e.target.value);
+        });
+
+        function populateTargetSelector(targets) {
+            targetSelector.innerHTML = '';
+            targets.forEach(target => {
+                const option = document.createElement('option');
+                option.value = target;
+                option.textContent = target;
+                targetSelector.appendChild(option);
+            });
+        }
+
+        function updateDashboard(target) {
+            if (!fullData || !fullData[target]) return;
+            const targetData = fullData[target];
+            populateMetricsTable(targetData.metrics);
+            createPredictionsChart(targetData.predictions, target);
+        }
+
+        function populateMetricsTable(metricsArray) {
+            const tbody = document.getElementById('metrics-table').querySelector('tbody');
+            tbody.innerHTML = '';
+            if (!metricsArray) return;
+            metricsArray.forEach(modelMetrics => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${modelMetrics.Model}</td>
+                    <td>${modelMetrics.MAE}</td>
+                    <td>${modelMetrics.RMSE}</td>
+                    <td>${modelMetrics['R²']}</td>
+                    <td>${modelMetrics['Training Time']}</td>
+                    <td>${modelMetrics['Model Size']}</td>
+                `;
+            });
+        }
+
+        function createPredictionsChart(predictionsData, targetName) {
+            const canvas = document.getElementById('predictionsChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const datasets = [{
+                label: `Actual ${targetName}`,
+                data: predictionsData.actual,
+                borderColor: '#FFD700',
+                borderWidth: 2,
+                pointRadius: 0
+            }];
+            
+            const modelColors = {'Ridge': '#00BFFF', 'Lasso': '#FFA500', 'RandomForest': '#32CD32', 'XGBoost': '#FF6384', 'SVR': '#EE82EE'};
+            
+            for (const modelName in predictionsData) {
+                if (modelName !== 'index' && modelName !== 'actual') {
+                    datasets.push({
+                        label: `${modelName} Predicted`,
+                        data: predictionsData[modelName],
+                        borderColor: modelColors[modelName] || '#FFFFFF',
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        borderDash: [5, 5]
+                    });
+                }
+            }
+
+            if (predictionsChart) predictionsChart.destroy();
+
+            predictionsChart = new Chart(ctx, {
+                type: 'line',
+                data: { 
+                    labels: predictionsData.index, 
+                    datasets: datasets 
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { title: { display: true, text: targetName, color: '#E0E0E0'}, ticks: { color: '#bbb' }, grid: { color: '#444' } },
+                        x: { ticks: { color: '#bbb', maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }, grid: { color: '#444' } }
+                    },
+                    plugins: { legend: { labels: { color: '#E0E0E0'} } }
+                }
+            });
+        }
+
+        function setLoading(isLoading) {
+            trainBtn.classList.toggle('loading', isLoading);
+            trainBtn.disabled = isLoading;
+        }
+    });
+    </script>
+</body>
+</html>

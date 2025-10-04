@@ -1,0 +1,223 @@
+:root {
+    --background-color: #121212;
+    --primary-panel-bg: #1E1E1E;
+    --sidebar-bg: #181818;
+    --accent-color: #9C27B0;
+    --accent-hover-color: #7B1FA2;
+    --text-color: #E0E0E0;
+    --header-color: #FFFFFF;
+    --border-color: #444444;
+    --card-bg: #2A2A2A;
+    --font-family: 'Poppins', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.main-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    width: 100%;
+    max-width: 1400px;
+    height: 85vh;
+    max-height: 850px;
+    background-color: var(--primary-panel-bg);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h1 {
+    font-size: 1.5rem;
+    color: var(--header-color);
+    margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar nav ul {
+    list-style-type: none;
+}
+
+.sidebar nav li {
+    margin-bottom: 1.5rem;
+}
+
+.sidebar nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+    opacity: 0.7;
+}
+
+.sidebar nav li.active a,
+.sidebar nav a:hover {
+    color: var(--header-color);
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* --- Content Panel --- */
+.content-panel {
+    padding: 3rem;
+    overflow-y: auto;
+}
+
+.content-panel header {
+    margin-bottom: 2rem;
+}
+
+.content-panel h2 {
+    font-size: 2.2rem;
+    color: var(--header-color);
+    margin-bottom: 0.5rem;
+}
+
+.action-card {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.action-btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    margin-top: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background-color: var(--accent-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    text-decoration: none;
+    text-align: center;
+}
+
+.action-btn:hover {
+    background-color: var(--accent-hover-color);
+    box-shadow: 0 0 15px rgba(156, 39, 176, 0.5);
+}
+
+/* --- Summary Section --- */
+#summary-section.hidden {
+    display: none;
+}
+
+#summary-section h3 {
+    font-size: 1.5rem;
+    color: var(--header-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-item {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.summary-item h4 {
+    color: var(--text-color);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+.summary-item p {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.outlier-details {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.outlier-details ul {
+    list-style-type: none;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.outlier-details li {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.outlier-details li:last-child {
+    border-bottom: none;
+}
+
+.next-step {
+    text-align: center;
+    display: none;
+}
+
+/* --- Loader --- */
+.action-btn.loading {
+    color: transparent;
+    cursor: not-allowed;
+}
+
+.spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    opacity: 0;
+}
+
+.action-btn.loading .spinner {
+    opacity: 1;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}

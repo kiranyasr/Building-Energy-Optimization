@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Learning Models | Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/deep_learning.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">1. Upload Data</a></li>
+                    <li><a href="/clean">2. Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">3. Fluctuation Analysis</a></li>
+                    <li><a href="/features">4. Feature Engineering</a></li>
+                    <li><a href="/selection">5. Feature Selection</a></li>
+                    <li><a href="/models">6. Baseline Models</a></li>
+                    <li class="active"><a href="/deep_learning">7. Deep Learning</a></li>
+                    <li><a href="/optimization">8. Optimization</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>Deep Learning & Hybrid Models</h2>
+                <p>Training advanced sequence models (LSTM) for time-series forecasting.</p>
+            </header>
+            
+            <div class="action-card">
+                <p>Click to train an LSTM and a Hybrid model. <strong>Note:</strong> This is computationally intensive and may take a minute to complete.</p>
+                <button id="train-btn" class="action-btn">
+                    Train Advanced Models
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <div id="results-section" class="hidden">
+                <section class="chart-container">
+                    <h3>LSTM Training & Validation Loss</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="lossChart"></canvas>
+                    </div>
+                </section>
+                
+                <section class="chart-container full-width">
+                    <h3>Model Comparison: Actual vs. Predicted</h3>
+                    <div class="canvas-wrapper-large">
+                        <canvas id="predictionsChart"></canvas>
+                    </div>
+                </section>
+
+                <section class="next-step">
+                    <p>Advanced model training is complete. You can now proceed to the final step.</p>
+                    <a href="/optimization" class="action-btn">Proceed to Optimization &rarr;</a>
+                </section>
+                </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const trainBtn = document.getElementById('train-btn');
+        const resultsSection = document.getElementById('results-section');
+        const nextStepSection = document.querySelector('.next-step');
+        let lossChart, predictionsChart;
+
+        trainBtn.addEventListener('click', async () => {
+            setLoading(true);
+            resultsSection.classList.add('hidden');
+            nextStepSection.style.display = 'none';
+
+            try {
+                const response = await fetch('/run_advanced_models', { method: 'POST' });
+                const result = await response.json();
+
+                if (!response.ok || result.error) { throw new Error(result.error); }
+                
+                displayResults(result);
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function displayResults(data) {
+            createLossChart(data.charts.loss_curves);
+            createPredictionsChart(data.charts.predictions, data.target);
+            resultsSection.classList.remove('hidden');
+            nextStepSection.style.display = 'block'; // Show the button
+        }
+
+        function createLossChart(lossData) {
+            const ctx = document.getElementById('lossChart').getContext('2d');
+            if (lossChart) lossChart.destroy();
+            lossChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: lossData.loss.length}, (_, i) => `Epoch ${i + 1}`),
+                    datasets: [
+                        { label: 'Training Loss', data: lossData.loss, borderColor: '#00BFFF', borderWidth: 1.5, pointRadius: 0, tension: 0.1 },
+                        { label: 'Validation Loss', data: lossData.val_loss, borderColor: '#FF6384', borderWidth: 1.5, pointRadius: 0, tension: 0.1 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { 
+                    y: { title: { display: true, text: 'Loss (MSE)', color: '#E0E0E0'}, grid: {color: '#444'}, ticks: {color: '#bbb'} },
+                    x: { title: { display: true, text: 'Epoch', color: '#E0E0E0'}, grid: {color: '#444'}, ticks: {color: '#bbb'} }
+                }, plugins: { legend: { labels: { color: '#E0E0E0'} } } }
+            });
+        }
+
+        function createPredictionsChart(predData, targetName) {
+            const ctx = document.getElementById('predictionsChart').getContext('2d');
+            if (predictionsChart) predictionsChart.destroy();
+            predictionsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: predData.labels,
+                    datasets: [
+                        { label: 'Actual', data: predData.actuals, borderColor: '#FFD700', borderWidth: 2, pointRadius: 0 },
+                        { label: 'Baseline (XGBoost)', data: predData.baseline, borderColor: '#cccccc', borderWidth: 1.5, pointRadius: 0, borderDash: [5, 5] },
+                        { label: 'LSTM', data: predData.lstm, borderColor: '#00BFFF', borderWidth: 1.5, pointRadius: 0, borderDash: [5, 5] },
+                        { label: 'Hybrid Model', data: predData.hybrid, borderColor: '#32CD32', borderWidth: 2, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { title: { display: true, text: targetName, color: '#E0E0E0'}, grid: {color: '#444'}, ticks: {color: '#bbb'} },
+                        x: { ticks: { color: '#bbb', maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }, grid: {color: '#444'} }
+                    },
+                    plugins: { legend: { labels: { color: '#E0E0E0'} } }
+                }
+            });
+        }
+
+        function setLoading(isLoading) {
+            trainBtn.classList.toggle('loading', isLoading);
+            trainBtn.disabled = isLoading;
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparison & Report | Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/comparison.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">1. Upload Data</a></li>
+                    <li><a href="/clean">2. Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">3. Fluctuation Analysis</a></li>
+                    <li><a href="/features">4. Feature Engineering</a></li>
+                    <li><a href="/selection">5. Feature Selection</a></li>
+                    <li><a href="/models">6. Baseline Models</a></li>
+                    <li><a href="/deep_learning">7. Deep Learning</a></li>
+                    <li><a href="/optimization">8. Optimization</a></li>
+                    <li><a href="/anomalies">9. Anomaly Detection</a></li>
+                    <li><a href="/wastage">10. Wastage Analysis</a></li>
+                    <li class="active"><a href="/comparison">11. Final Report</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>Final Results Comparison & Reporting</h2>
+                <p>A comprehensive summary comparing all trained models.</p>
+            </header>
+            
+            <div class="action-card">
+                <p>Click to compile all model results, generate comparison charts, and prepare the final report summary.</p>
+                <button id="compile-btn" class="action-btn">
+                    Generate Final Report
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <div id="results-section" class="hidden">
+                <section class="results-table-container">
+                    <h3>Combined Model Summary</h3>
+                    <table id="summary-table">
+                        <thead>
+                            <tr><th>Model</th><th>MAE</th><th>RMSE</th><th>R²</th><th>Model Size (KB)</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </section>
+
+                <div class="grid-container">
+                    <section class="chart-container">
+                        <h3>Accuracy Comparison (R²)</h3>
+                        <div class="canvas-wrapper">
+                            <canvas id="r2Chart"></canvas>
+                        </div>
+                    </section>
+                    <section class="chart-container">
+                        <h3>Top 10 Feature Importances (Optimized Model)</h3>
+                        <div class="canvas-wrapper">
+                            <canvas id="importanceChart"></canvas>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const compileBtn = document.getElementById('compile-btn');
+        const resultsSection = document.getElementById('results-section');
+
+        compileBtn.addEventListener('click', async () => {
+            setLoading(true);
+            resultsSection.classList.add('hidden');
+            try {
+                const response = await fetch('/get_comparison_data', { method: 'POST' });
+                const result = await response.json();
+                if (!response.ok) { throw new Error(result.error); }
+                displayResults(result);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function displayResults(data) {
+            populateTable(data.summary_table);
+            createR2Chart(data.charts.accuracy_comparison);
+            createImportanceChart(data.charts.feature_importance);
+            resultsSection.classList.remove('hidden');
+        }
+
+        function populateTable(tableData) {
+            const tbody = document.getElementById('summary-table').querySelector('tbody');
+            tbody.innerHTML = '';
+            tableData.forEach(row => {
+                const tr = tbody.insertRow();
+                tr.innerHTML = `
+                    <td>${row.Model}</td>
+                    <td>${row.MAE}</td>
+                    <td>${row.RMSE}</td>
+                    <td>${row['R²']}</td>
+                    <td>${row['Model Size (KB)']}</td>
+                `;
+            });
+        }
+
+        function createR2Chart(chartData) {
+            const ctx = document.getElementById('r2Chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'R² Score (Higher is Better)',
+                        data: chartData.r2_data,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+        
+        function createImportanceChart(chartData) {
+            const ctx = document.getElementById('importanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.features,
+                    datasets: [{
+                        label: 'Importance Score',
+                        data: chartData.scores,
+                        backgroundColor: '#9C27B0',
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function setLoading(isLoading) {
+            compileBtn.classList.toggle('loading', isLoading);
+            compileBtn.disabled = isLoading;
+        }
+    });
+    </script>
+</body>
+</html>

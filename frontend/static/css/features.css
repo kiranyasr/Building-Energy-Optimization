@@ -1,0 +1,121 @@
+:root {
+    --background-color: #121212;
+    --primary-panel-bg: #1E1E1E;
+    --sidebar-bg: #181818;
+    --accent-color: #9C27B0;
+    --accent-hover-color: #7B1FA2;
+    --text-color: #E0E0E0;
+    --header-color: #FFFFFF;
+    --border-color: #444444;
+    --card-bg: #2A2A2A;
+    --font-family: 'Poppins', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: var(--font-family); background-color: var(--background-color);
+    color: var(--text-color); display: flex; justify-content: center;
+    align-items: center; min-height: 100vh; padding: 2rem;
+}
+.main-container {
+    display: grid; grid-template-columns: 280px 1fr; width: 100%;
+    max-width: 1600px; height: 90vh; background-color: var(--primary-panel-bg);
+    border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.sidebar {
+    background-color: var(--sidebar-bg); padding: 2rem;
+    display: flex; flex-direction: column;
+}
+/* --- ALIGNMENT FIX STARTS HERE --- */
+.sidebar h1 {
+    font-size: 1.5rem; color: var(--header-color); margin-bottom: 3rem;
+    padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);
+    text-align: left; 
+}
+.sidebar nav {
+    text-align: left;
+}
+.sidebar nav ul { 
+    list-style-type: none; 
+    padding-left: 0; 
+}
+/* --- ALIGNMENT FIX ENDS HERE --- */
+.sidebar nav li { margin-bottom: 1.5rem; }
+.sidebar nav a {
+    color: var(--text-color); text-decoration: none; font-size: 1rem;
+    transition: color 0.3s; opacity: 0.7;
+}
+.sidebar nav li.active a, .sidebar nav a:hover {
+    color: var(--header-color); opacity: 1; font-weight: 600;
+}
+.content-panel { padding: 2rem 3rem; overflow-y: auto; }
+.content-panel header { margin-bottom: 2rem; }
+.content-panel h2 { font-size: 2.2rem; color: var(--header-color); margin-bottom: 0.5rem; }
+.action-card {
+    background-color: var(--card-bg); padding: 2rem;
+    border-radius: 10px; margin-bottom: 2rem; border: 1px solid var(--border-color);
+}
+.action-btn {
+    display: inline-block; padding: 0.8rem 1.5rem; margin-top: 1rem;
+    font-size: 1rem; font-weight: 600; color: #fff;
+    background-color: var(--accent-color); border: none; border-radius: 8px;
+    cursor: pointer; transition: all 0.3s; position: relative;
+    text-decoration: none; text-align: center;
+}
+.action-btn:hover { background-color: var(--accent-hover-color); box-shadow: 0 0 15px rgba(156, 39, 176, 0.5); }
+.action-btn.loading { color: transparent; cursor: not-allowed; }
+.spinner {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; opacity: 0;
+}
+.action-btn.loading .spinner { opacity: 1; }
+@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.hidden { display: none; }
+/* Page-specific styles below will be merged correctly when you paste this over the old files */
+.explanation-section {
+    background-color: var(--card-bg); padding: 2rem; border-radius: 10px;
+    margin-bottom: 2rem; border: 1px solid var(--border-color);
+}
+#feature-explanation-list {
+    list-style-type: none; padding-left: 0;
+}
+#feature-explanation-list li {
+    padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);
+}
+#feature-explanation-list li:last-child { border-bottom: none; }
+#feature-explanation-list strong { color: var(--accent-color); }
+
+.table-section {
+    margin-bottom: 2rem;
+}
+
+.table-container {
+    width: 100%; overflow-x: auto; border: 1px solid var(--border-color);
+    border-radius: 10px; max-height: 600px;
+}
+#features-table { width: 100%; border-collapse: collapse; }
+#features-table th, #features-table td {
+    padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+#features-table thead th {
+    background-color: #333; position: sticky; top: 0; z-index: 1;
+}
+#features-table tbody tr:nth-child(even) { background-color: var(--card-bg); }
+#features-table tbody tr:hover { background-color: #383838; }
+
+.next-step {
+    text-align: center;
+    display: none; /* Hidden by default */
+}
+
+/* --- Loader --- */
+.action-btn.loading { color: transparent; cursor: not-allowed; }
+.spinner {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;
+    opacity: 0;
+}
+.action-btn.loading .spinner { opacity: 1; }
+@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
