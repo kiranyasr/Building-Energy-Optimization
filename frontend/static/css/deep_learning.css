@@ -10,79 +10,172 @@
     --card-bg: #2A2A2A;
     --font-family: 'Poppins', sans-serif;
 }
+
+/* --- Reset and body --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    font-family: var(--font-family); background-color: var(--background-color);
-    color: var(--text-color); display: flex; justify-content: center;
-    align-items: center; min-height: 100vh; padding: 2rem;
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    padding: 2rem;
+    overflow-x: hidden;
 }
+
+/* --- Main layout --- */
 .main-container {
-    display: grid; grid-template-columns: 280px 1fr; width: 100%;
-    max-width: 1600px; height: 90vh; background-color: var(--primary-panel-bg);
-    border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    background-color: var(--primary-panel-bg);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: visible; /* allow full page scroll */
 }
+
+/* --- Sidebar --- */
 .sidebar {
-    background-color: var(--sidebar-bg); padding: 2rem;
-    display: flex; flex-direction: column;
+    background-color: var(--sidebar-bg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: sticky;
+    top: 0;
 }
+
 .sidebar h1 {
-    font-size: 1.5rem; color: var(--header-color); margin-bottom: 3rem;
-    padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);
+    font-size: 1.5rem;
+    color: var(--header-color);
+    margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
     text-align: left;
 }
-.sidebar nav { text-align: left; }
-.sidebar nav ul { list-style-type: none; padding-left: 0; }
-.sidebar nav li { margin-bottom: 1.5rem; }
-.sidebar nav a {
-    color: var(--text-color); text-decoration: none; font-size: 1rem;
-    transition: color 0.3s; opacity: 0.7;
+
+.sidebar nav {
+    text-align: left;
 }
-.sidebar nav li.active a, .sidebar nav a:hover {
-    color: var(--header-color); opacity: 1; font-weight: 600;
+
+.sidebar nav ul {
+    list-style-type: none;
+    padding-left: 0;
 }
-.content-panel { padding: 2rem 3rem; overflow-y: auto; }
-.content-panel header { margin-bottom: 2rem; }
-.content-panel h2 { font-size: 2.2rem; color: var(--header-color); margin-bottom: 0.5rem; }
-.action-card {
-    background-color: var(--card-bg); padding: 2rem;
-    border-radius: 10px; margin-bottom: 2rem; border: 1px solid var(--border-color);
-}
-.hidden { display: none; }
-#results-section h3 {
-    font-size: 1.2rem; margin-bottom: 1rem;
-    color: var(--header-color); text-align: center;
-}
-.chart-container {
-    background-color: var(--card-bg); padding: 1.5rem; border-radius: 10px;
-    border: 1px solid var(--border-color); display: flex; flex-direction: column;
+
+.sidebar nav li {
     margin-bottom: 1.5rem;
 }
-.chart-container.full-width { grid-column: 1 / -1; }
-.canvas-wrapper { position: relative; flex-grow: 1; height: 350px; }
-.canvas-wrapper-large { position: relative; flex-grow: 1; height: 500px; }
-.action-btn {
-    display: inline-block; padding: 0.8rem 1.5rem; margin-top: 1rem;
-    font-size: 1rem; font-weight: 600; color: #fff;
-    background-color: var(--accent-color); border: none; border-radius: 8px;
-    cursor: pointer; transition: all 0.3s; position: relative;
-    text-decoration: none; text-align: center;
+
+.sidebar nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+    opacity: 0.7;
 }
-.action-btn:hover { background-color: var(--accent-hover-color); box-shadow: 0 0 15px rgba(156, 39, 176, 0.5); }
+
+.sidebar nav li.active a,
+.sidebar nav a:hover {
+    color: var(--header-color);
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* --- Content Panel --- */
+.content-panel {
+    padding: 2rem 3rem;
+    overflow: visible; /* allow page scrolling */
+}
+
+.content-panel header {
+    margin-bottom: 2rem;
+}
+
+.content-panel h2 {
+    font-size: 2.2rem;
+    color: var(--header-color);
+    margin-bottom: 0.5rem;
+}
+
+/* --- Cards and Sections --- */
+.action-card, .chart-container, .summary-item, .outlier-details {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.chart-container.full-width {
+    grid-column: 1 / -1;
+}
+
+.canvas-wrapper { height: 350px; position: relative; }
+.canvas-wrapper-large { height: 500px; position: relative; }
+
+.hidden { display: none; }
+
+/* --- Buttons --- */
+.action-btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    margin-top: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background-color: var(--accent-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    text-decoration: none;
+    text-align: center;
+}
+
+.action-btn:hover {
+    background-color: var(--accent-hover-color);
+    box-shadow: 0 0 15px rgba(156, 39, 176, 0.5);
+}
+
 .action-btn.loading { color: transparent; cursor: not-allowed; }
+
 .spinner {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
     opacity: 0;
 }
+
 .action-btn.loading .spinner { opacity: 1; }
+
 @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-/* --- START: ADDED THIS STYLE FOR THE BUTTON --- */
+/* --- Next Step Button --- */
 .next-step {
     margin-top: 2rem;
     padding-top: 2rem;
     border-top: 1px solid var(--border-color);
     text-align: center;
-    display: none; /* Hidden by default */
+    display: none; /* hidden by default */
 }
-/* --- END: ADDED THIS STYLE FOR THE BUTTON --- */
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+    .main-container { grid-template-columns: 1fr; }
+    .sidebar { position: relative; top: auto; width: 100%; margin-bottom: 2rem; }
+}

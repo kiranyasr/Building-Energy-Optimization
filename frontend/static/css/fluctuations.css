@@ -10,113 +10,156 @@
     --card-bg: #2A2A2A;
     --font-family: 'Poppins', sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* --- Reset --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    font-family: var(--font-family); background-color: var(--background-color);
-    color: var(--text-color); display: flex; justify-content: center;
-    align-items: center; min-height: 100vh; padding: 2rem;
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    padding: 2rem;
+    overflow-x: hidden; /* prevent horizontal scroll */
 }
+
+/* --- Main Container --- */
 .main-container {
-    display: grid; grid-template-columns: 280px 1fr; width: 100%;
-    max-width: 1600px; height: 90vh; background-color: var(--primary-panel-bg);
-    border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    background-color: var(--primary-panel-bg);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: visible; /* allow full-page scrolling */
 }
+
+/* --- Sidebar --- */
 .sidebar {
-    background-color: var(--sidebar-bg); padding: 2rem;
-    display: flex; flex-direction: column;
+    background-color: var(--sidebar-bg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: sticky; /* keeps sidebar visible while scrolling */
+    top: 0;
 }
-/* --- ALIGNMENT FIX STARTS HERE --- */
+
 .sidebar h1 {
-    font-size: 1.5rem; color: var(--header-color); margin-bottom: 3rem;
-    padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);
-    text-align: left; 
+    font-size: 1.5rem;
+    color: var(--header-color);
+    margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
 }
+
 .sidebar nav {
     text-align: left;
 }
-.sidebar nav ul { 
-    list-style-type: none; 
-    padding-left: 0; 
+
+.sidebar nav ul {
+    list-style-type: none;
+    padding-left: 0;
 }
-/* --- ALIGNMENT FIX ENDS HERE --- */
-.sidebar nav li { margin-bottom: 1.5rem; }
+
+.sidebar nav li {
+    margin-bottom: 1.5rem;
+}
+
 .sidebar nav a {
-    color: var(--text-color); text-decoration: none; font-size: 1rem;
-    transition: color 0.3s; opacity: 0.7;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+    opacity: 0.7;
 }
-.sidebar nav li.active a, .sidebar nav a:hover {
-    color: var(--header-color); opacity: 1; font-weight: 600;
+
+.sidebar nav li.active a,
+.sidebar nav a:hover {
+    color: var(--header-color);
+    opacity: 1;
+    font-weight: 600;
 }
-.content-panel { padding: 2rem 3rem; overflow-y: auto; }
-.content-panel header { margin-bottom: 2rem; }
-.content-panel h2 { font-size: 2.2rem; color: var(--header-color); margin-bottom: 0.5rem; }
-.action-card {
-    background-color: var(--card-bg); padding: 2rem;
-    border-radius: 10px; margin-bottom: 2rem; border: 1px solid var(--border-color);
+
+/* --- Content Panel --- */
+.content-panel {
+    padding: 2rem 3rem;
+    overflow: visible; /* entire page scrolls */
 }
-.action-btn {
-    display: inline-block; padding: 0.8rem 1.5rem; margin-top: 1rem;
-    font-size: 1rem; font-weight: 600; color: #fff;
-    background-color: var(--accent-color); border: none; border-radius: 8px;
-    cursor: pointer; transition: all 0.3s; position: relative;
-    text-decoration: none; text-align: center;
+
+.content-panel header {
+    margin-bottom: 2rem;
 }
-.action-btn:hover { background-color: var(--accent-hover-color); box-shadow: 0 0 15px rgba(156, 39, 176, 0.5); }
-.action-btn.loading { color: transparent; cursor: not-allowed; }
-.spinner {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; opacity: 0;
+
+.content-panel h2 {
+    font-size: 2.2rem;
+    color: var(--header-color);
+    margin-bottom: 0.5rem;
 }
-.action-btn.loading .spinner { opacity: 1; }
-@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
-.hidden { display: none; }
-/* Page-specific styles below will be merged correctly when you paste this over the old files */
+
+/* --- Cards & KPI Grid --- */
+.action-card,
+.kpi-card,
+.chart-container,
+.explanation-section {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+/* KPI Grid */
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
-.kpi-card {
-    background-color: var(--card-bg); padding: 1.5rem;
-    border-radius: 10px; border: 1px solid var(--border-color);
-}
+
 .kpi-card h4 {
-    color: var(--text-color); font-size: 1rem;
-    margin-bottom: 0.5rem; opacity: 0.8;
+    color: var(--text-color);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
 }
+
 .kpi-card p {
-    font-size: 2.2rem; font-weight: 600;
+    font-size: 2.2rem;
+    font-weight: 600;
     color: var(--accent-color);
 }
 
+/* Chart Grid */
 .chart-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 }
+
 .chart-container {
-    background-color: var(--card-bg); padding: 1.5rem;
-    border-radius: 10px; border: 1px solid var(--border-color);
     height: 400px;
 }
+
 .chart-container.full-width {
-    grid-column: 1 / -1; /* Span full width */
+    grid-column: 1 / -1;
 }
+
 .chart-container h3 {
-    font-size: 1.2rem; margin-bottom: 1rem; color: var(--header-color);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--header-color);
     text-align: center;
 }
 
-.next-step {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-    display: none; /* Hidden by default */
-}
-
+/* --- Buttons --- */
 .action-btn {
     display: inline-block;
     padding: 0.8rem 1.5rem;
@@ -132,6 +175,58 @@ body {
 }
 
 .action-btn:hover {
-    background-color: #7B1FA2;
+    background-color: var(--accent-hover-color);
     box-shadow: 0 0 15px rgba(156, 39, 176, 0.5);
+}
+
+.action-btn.loading {
+    color: transparent;
+    cursor: not-allowed;
+}
+
+.spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    opacity: 0;
+}
+
+.action-btn.loading .spinner {
+    opacity: 1;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* --- Next Step Button --- */
+.next-step {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    display: none; /* hidden by default */
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: relative;
+        top: auto;
+        width: 100%;
+        margin-bottom: 2rem;
+    }
 }

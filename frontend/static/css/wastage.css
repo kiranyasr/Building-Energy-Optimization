@@ -18,7 +18,7 @@ body, .main-container { /* Basic layout styles */
 body { justify-content: center; align-items: center; min-height: 100vh; padding: 2rem; }
 .main-container {
     display: grid; grid-template-columns: 280px 1fr; width: 100%;
-    max-width: 1600px; height: 90vh; background-color: var(--primary-panel-bg);
+    max-width: 1600px; height: 100vh; background-color: var(--primary-panel-bg);
     border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 .sidebar { background-color: var(--sidebar-bg); padding: 2rem; display: flex; flex-direction: column; }

@@ -14,11 +14,11 @@
 body {
     font-family: var(--font-family); background-color: var(--background-color);
     color: var(--text-color); display: flex; justify-content: center;
-    align-items: center; min-height: 100vh; padding: 2rem;
+    align-items: center; min-height: 110vh; padding: 2rem;
 }
 .main-container {
     display: grid; grid-template-columns: 280px 1fr; width: 100%;
-    max-width: 1600px; height: 90vh; background-color: var(--primary-panel-bg);
+    max-width: 1600px; height: 100vh; background-color: var(--primary-panel-bg);
     border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 .sidebar {
@@ -113,7 +113,7 @@ body {
 .action-btn.loading { color: transparent; cursor: not-allowed; }
 .spinner {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3);
+    width: 20px; height: 30px; border: 3px solid rgba(255, 255, 255, 0.3);
     border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;
     opacity: 0;
 }

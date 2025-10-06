@@ -7,58 +7,178 @@
     --header-color: #FFFFFF;
     --border-color: #444444;
     --card-bg: #2A2A2A;
+    --font-family: 'Poppins', sans-serif;
 }
+
+/* --- Reset --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    font-family: 'Poppins', sans-serif; background-color: var(--background-color);
-    color: var(--text-color); display: flex; justify-content: center;
-    align-items: center; min-height: 100vh; padding: 2rem;
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    padding: 2rem;
 }
+
+/* --- Main container --- */
 .main-container {
     display: grid;
     grid-template-columns: 280px 1fr;
     width: 100%;
     max-width: 1600px;
-    height: 90vh; /* Keep the overall container height fixed */
     background-color: var(--primary-panel-bg);
     border-radius: 20px;
-    overflow: hidden; /* This is important for the rounded corners */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden; /* Sidebar stays visible */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    min-height: 80vh; /* flexible height for scrolling */
 }
-.sidebar { background-color: var(--sidebar-bg); padding: 2rem; display: flex; flex-direction: column; }
+
+/* --- Sidebar --- */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    position: sticky; /* Sidebar stays fixed while scrolling */
+    top: 0;
+    height: 100%;
+}
+
 .sidebar h1 {
-    font-size: 1.5rem; color: var(--header-color); margin-bottom: 3rem;
-    padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); text-align: left;
+    font-size: 1.5rem;
+    color: var(--header-color);
+    margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
 }
-.sidebar nav { text-align: left; }
-.sidebar nav ul { list-style-type: none; padding-left: 0; }
-.sidebar nav li { margin-bottom: 1.5rem; }
-.sidebar nav a { color: var(--text-color); text-decoration: none; font-size: 1rem; transition: color 0.3s; opacity: 0.7; }
-.sidebar nav li.active a, .sidebar nav a:hover { color: var(--header-color); opacity: 1; font-weight: 600; }
 
-/* --- THIS IS THE SCROLLING FIX --- */
-.content-panel { 
-    padding: 2rem 3rem; 
-    overflow-y: auto; /* This makes the content panel scrollable */
+.sidebar nav {
+    text-align: left;
 }
-/* --- END OF FIX --- */
 
-.content-panel header { margin-bottom: 2rem; }
-.content-panel h2 { font-size: 2.2rem; color: var(--header-color); margin-bottom: 0.5rem; }
+.sidebar nav ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.sidebar nav li {
+    margin-bottom: 1.5rem;
+}
+
+.sidebar nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+    opacity: 0.7;
+}
+
+.sidebar nav li.active a,
+.sidebar nav a:hover {
+    color: var(--header-color);
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* --- Content panel (scrollable) --- */
+.content-panel {
+    padding: 2rem 3rem;
+    overflow-y: auto; /* Only this panel scrolls */
+    max-height: 100vh; /* Fill remaining height */
+}
+
+/* --- Content headers --- */
+.content-panel header {
+    margin-bottom: 2rem;
+}
+
+.content-panel h2 {
+    font-size: 2.2rem;
+    color: var(--header-color);
+    margin-bottom: 0.5rem;
+}
+
+/* --- Guide / Cards --- */
 .guide-content {
     background-color: var(--card-bg);
     padding: 2.5rem;
     border-radius: 10px;
     border: 1px solid var(--border-color);
     line-height: 1.8;
+    margin-bottom: 2rem;
 }
+
 .guide-content h3 {
     font-size: 1.5rem;
     color: var(--accent-color);
     margin-top: 2rem;
     margin-bottom: 1rem;
 }
-.guide-content h3:first-child { margin-top: 0; }
-.guide-content p { margin-bottom: 1rem; }
-.guide-content ol { padding-left: 1.5rem; }
-.guide-content ol li { margin-bottom: 0.75rem; }
-.guide-content strong { color: var(--header-color); }
+
+.guide-content h3:first-child {
+    margin-top: 0;
+}
+
+.guide-content p {
+    margin-bottom: 1rem;
+}
+
+.guide-content ol {
+    padding-left: 1.5rem;
+}
+
+.guide-content ol li {
+    margin-bottom: 0.75rem;
+}
+
+.guide-content strong {
+    color: var(--header-color);
+}
+
+/* --- Action button --- */
+.action-btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background-color: var(--accent-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    background-color: var(--accent-hover-color);
+    box-shadow: 0 0 15px rgba(156, 39, 176, 0.5);
+}
+
+/* --- Next step section --- */
+.next-step {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    display: none;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+    .main-container {
+        grid-template-columns: 1fr; /* Sidebar becomes top panel */
+    }
+
+    .sidebar {
+        position: relative;
+        top: auto;
+        height: auto;
+    }
+}

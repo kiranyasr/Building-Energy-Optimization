@@ -21,11 +21,9 @@ body {
     font-family: var(--font-family);
     background-color: var(--background-color);
     color: var(--text-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
     padding: 2rem;
+    overflow-x: hidden; /* prevent horizontal scroll */
 }
 
 .main-container {
@@ -33,11 +31,10 @@ body {
     grid-template-columns: 280px 1fr;
     width: 100%;
     max-width: 1400px;
-    height: 85vh;
-    max-height: 850px;
+    margin: 0 auto;
     background-color: var(--primary-panel-bg);
     border-radius: 20px;
-    overflow: hidden;
+    overflow: visible; /* allow full page scrolling */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -47,6 +44,9 @@ body {
     padding: 2rem;
     display: flex;
     flex-direction: column;
+    height: 100%; /* fill height */
+    position: sticky;
+    top: 0;
 }
 
 .sidebar h1 {
@@ -83,7 +83,7 @@ body {
 /* --- Content Panel --- */
 .content-panel {
     padding: 3rem;
-    overflow-y: auto;
+    overflow: visible; /* let page scroll */
 }
 
 .content-panel header {
@@ -220,4 +220,18 @@ body {
 
 @keyframes spin {
     to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* --- Responsive for smaller screens --- */
+@media (max-width: 1024px) {
+    .main-container {
+        grid-template-columns: 1fr; /* stack sidebar above content */
+    }
+
+    .sidebar {
+        position: relative;
+        top: auto;
+        width: 100%;
+        margin-bottom: 2rem;
+    }
 }

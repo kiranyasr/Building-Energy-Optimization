@@ -7,247 +7,69 @@
     --header-color: #FFFFFF;
     --border-color: #444444;
     --card-bg: #2A2A2A;
-    --font-family: 'Poppins', sans-serif;
 }
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+body, .main-container {
+    font-family: 'Poppins', sans-serif; background-color: var(--background-color);
+    color: var(--text-color); display: flex;
 }
-
-/* --- BODY --- */
-body {
-    font-family: var(--font-family);
-    background-color: var(--background-color);
-    color: var(--text-color);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 2rem;
-    overflow-x: hidden; /* Prevent horizontal scroll */
-}
-
-/* --- MAIN CONTAINER --- */
+body { justify-content: center; align-items: center; min-height: 100vh; padding: 2rem; }
 .main-container {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    width: 100%;
-    max-width: 1600px;
-    background-color: var(--primary-panel-bg);
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    overflow: visible; /* Allow full-page scroll */
+    display: grid; grid-template-columns: 280px 1fr; width: 100%;
+    max-width: 1600px; height: 100vh; background-color: var(--primary-panel-bg);
+    border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
-
-/* --- SIDEBAR --- */
-.sidebar {
-    background-color: var(--sidebar-bg);
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-}
-
+.sidebar { background-color: var(--sidebar-bg); padding: 2rem; display: flex; flex-direction: column; }
 .sidebar h1 {
-    font-size: 1.5rem;
-    color: var(--header-color);
-    margin-bottom: 3rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-    text-align: left;
+    font-size: 1.5rem; color: var(--header-color); margin-bottom: 3rem;
+    padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); text-align: left;
 }
-
-.sidebar nav {
-    text-align: left;
-}
-
-.sidebar nav ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-.sidebar nav li {
-    margin-bottom: 1.5rem;
-}
-
-.sidebar nav a {
-    color: var(--text-color);
-    text-decoration: none;
-    font-size: 1rem;
-    transition: color 0.3s;
-    opacity: 0.7;
-}
-
-.sidebar nav li.active a,
-.sidebar nav a:hover {
-    color: var(--header-color);
-    opacity: 1;
-    font-weight: 600;
-}
-
-/* --- CONTENT PANEL --- */
-.content-panel {
-    padding: 2rem 3rem;
-    overflow: visible; /* Disable panel-only scrolling */
-}
-
-.content-panel header {
-    margin-bottom: 2rem;
-}
-
-.content-panel h2 {
-    font-size: 2.2rem;
-    color: var(--header-color);
-    margin-bottom: 0.5rem;
-}
-
-/* --- CARDS AND ELEMENTS --- */
+.sidebar nav { text-align: left; }
+.sidebar nav ul { list-style-type: none; padding-left: 0; }
+.sidebar nav li { margin-bottom: 1.5rem; }
+.sidebar nav a { color: var(--text-color); text-decoration: none; font-size: 1rem; transition: color 0.3s; opacity: 0.7; }
+.sidebar nav li.active a, .sidebar nav a:hover { color: var(--header-color); opacity: 1; font-weight: 600; }
+.content-panel { padding: 2rem 3rem; overflow-y: auto; }
+.content-panel header { margin-bottom: 2rem; }
+.content-panel h2 { font-size: 2.2rem; color: var(--header-color); margin-bottom: 0.5rem; }
 .action-card {
-    background-color: var(--card-bg);
-    padding: 2rem;
-    border-radius: 10px;
-    margin-bottom: 2rem;
-    border: 1px solid var(--border-color);
+    background-color: var(--card-bg); padding: 2rem;
+    border-radius: 10px; margin-bottom: 2rem; border: 1px solid var(--border-color);
 }
-
-.hidden {
-    display: none;
-}
-
+.hidden { display: none; }
 #results-section h3 {
-    font-size: 1.5rem;
-    color: var(--header-color);
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
+    font-size: 1.5rem; color: var(--header-color); margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);
 }
-
-/* --- TABLES --- */
-.results-table-container,
-.artifacts-container {
-    background-color: var(--card-bg);
-    padding: 2rem;
-    border-radius: 10px;
-    margin-bottom: 2rem;
-    border: 1px solid var(--border-color);
+.results-table-container {
+    background-color: var(--card-bg); padding: 2rem; border-radius: 10px;
+    margin-bottom: 2rem; border: 1px solid var(--border-color);
 }
-
-#summary-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: center;
+#summary-table { width: 100%; border-collapse: collapse; text-align: center; }
+#summary-table th, #summary-table td {
+    padding: 1rem; border-bottom: 1px solid var(--border-color);
 }
-
-#summary-table th,
-#summary-table td {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-#summary-table th {
-    background-color: #333;
-}
-
-#summary-table td:first-child {
-    text-align: left;
-    font-weight: 600;
-    color: var(--accent-color);
-}
-
-#summary-table tbody tr:hover {
-    background-color: #383838;
-}
-
-/* --- GRID AND CHARTS --- */
-.grid-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
+#summary-table th { background-color: #333; }
+#summary-table td:first-child { text-align: left; font-weight: 600; color: var(--accent-color); }
+#summary-table tbody tr:hover { background-color: #383838; }
+.grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 .chart-container {
-    background-color: var(--card-bg);
-    padding: 1.5rem;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
+    background-color: var(--card-bg); padding: 1.5rem; border-radius: 10px;
+    border: 1px solid var(--border-color); display: flex; flex-direction: column;
 }
-
-.canvas-wrapper {
-    position: relative;
-    height: 400px;
-}
-
-/* --- ARTIFACTS --- */
-.artifacts-container ul {
-    list-style: none;
-    padding: 0;
-}
-
-.artifacts-container li {
-    margin-bottom: 1rem;
-}
-
-.artifact-link {
-    display: inline-block;
-    padding: 0.8rem 1.5rem;
-    background-color: #333;
-    color: var(--text-color);
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.artifact-link:hover {
-    background-color: var(--accent-color);
-}
-
-/* --- BUTTONS --- */
+.canvas-wrapper { position: relative; height: 400px; }
+.action-btn, .spinner { /* Loader styles */ }
 .action-btn {
-    display: inline-block;
-    padding: 0.8rem 1.5rem;
-    margin-top: 1rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #fff;
-    background-color: var(--accent-color);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
-    text-decoration: none;
-    text-align: center;
+    display: inline-block; padding: 0.8rem 1.5rem; margin-top: 1rem;
+    font-size: 1rem; font-weight: 600; color: #fff;
+    background-color: var(--accent-color); border: none; border-radius: 8px;
+    cursor: pointer; transition: all 0.3s; position: relative;
+    text-decoration: none; text-align: center;
 }
-
-.action-btn.loading {
-    color: transparent;
-    cursor: not-allowed;
-}
-
+.action-btn.loading { color: transparent; cursor: not-allowed; }
 .spinner {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    opacity: 0;
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; opacity: 0;
 }
-
-.action-btn.loading .spinner {
-    opacity: 1;
-}
-
-@keyframes spin {
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}
+.action-btn.loading .spinner { opacity: 1; }
+@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
