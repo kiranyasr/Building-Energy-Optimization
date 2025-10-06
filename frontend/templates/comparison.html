@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comparison & Report | Energy Analysis</title>
+    <title>Final Report | Energy Analysis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/comparison.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,28 +16,31 @@
             <h1>Analysis Pipeline</h1>
             <nav>
                 <ul>
-                    <li><a href="/">1. Upload Data</a></li>
-                    <li><a href="/clean">2. Clean & Preprocess</a></li>
-                    <li><a href="/fluctuations">3. Fluctuation Analysis</a></li>
-                    <li><a href="/features">4. Feature Engineering</a></li>
-                    <li><a href="/selection">5. Feature Selection</a></li>
-                    <li><a href="/models">6. Baseline Models</a></li>
-                    <li><a href="/deep_learning">7. Deep Learning</a></li>
-                    <li><a href="/optimization">8. Optimization</a></li>
-                    <li><a href="/anomalies">9. Anomaly Detection</a></li>
-                    <li><a href="/wastage">10. Wastage Analysis</a></li>
-                    <li class="active"><a href="/comparison">11. Final Report</a></li>
+                    <li><a href="/">Upload Data</a></li>
+                    <li><a href="/clean">Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">Fluctuation Analysis</a></li>
+                    <li><a href="/features">Feature Engineering</a></li>
+                    <li><a href="/selection">Feature Selection</a></li>
+                    <li><a href="/models">Baseline Models</a></li>
+                    <li><a href="/deep_learning">Deep Learning</a></li>
+                    <li><a href="/optimization">Optimization</a></li>
+                    <li><a href="/anomalies">Anomaly Detection</a></li>
+                    <li><a href="/wastage">Wastage Analysis</a></li>
+                    <li class="active"><a href="/comparison">Final Report</a></li>
+                    <li><a href="/deployment">Deployment</a></li>
+                    <li><a href="/user_guide">User Guide</a></li>
                 </ul>
             </nav>
         </aside>
+
         <main class="content-panel">
             <header>
                 <h2>Final Results Comparison & Reporting</h2>
-                <p>A comprehensive summary comparing all trained models.</p>
+                <p>Compare all trained models, visualize performance, and download key results.</p>
             </header>
-            
+
             <div class="action-card">
-                <p>Click to compile all model results, generate comparison charts, and prepare the final report summary.</p>
+                <p>Click below to compile all results and generate the final report.</p>
                 <button id="compile-btn" class="action-btn">
                     Generate Final Report
                     <div class="spinner"></div>
@@ -49,7 +52,13 @@
                     <h3>Combined Model Summary</h3>
                     <table id="summary-table">
                         <thead>
-                            <tr><th>Model</th><th>MAE</th><th>RMSE</th><th>R²</th><th>Model Size (KB)</th></tr>
+                            <tr>
+                                <th>Model</th>
+                                <th>MAE</th>
+                                <th>RMSE</th>
+                                <th>R²</th>
+                                <th>Model Size (KB)</th>
+                            </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
@@ -57,18 +66,26 @@
 
                 <div class="grid-container">
                     <section class="chart-container">
-                        <h3>Accuracy Comparison (R²)</h3>
-                        <div class="canvas-wrapper">
-                            <canvas id="r2Chart"></canvas>
-                        </div>
+                        <h3>Model Accuracy (R²)</h3>
+                        <div class="canvas-wrapper"><canvas id="r2Chart"></canvas></div>
                     </section>
+
                     <section class="chart-container">
-                        <h3>Top 10 Feature Importances (Optimized Model)</h3>
-                        <div class="canvas-wrapper">
-                            <canvas id="importanceChart"></canvas>
-                        </div>
+                        <h3>Top 10 Feature Importances (Final Model)</h3>
+                        <div class="canvas-wrapper"><canvas id="importanceChart"></canvas></div>
                     </section>
                 </div>
+
+                <section class="artifacts-container">
+                    <h3>Downloadable Artifacts</h3>
+                    <ul id="artifact-list"></ul>
+                </section>
+
+                <!-- This is the new section for the deployment link -->
+                <section class="next-step">
+                    <p>The analysis pipeline is complete. You can now proceed to the deployment page to make live predictions.</p>
+                    <a href="/deployment" class="action-btn">Go to Deployment &rarr;</a>
+                </section>
             </div>
         </main>
     </div>
@@ -77,15 +94,21 @@
     document.addEventListener('DOMContentLoaded', () => {
         const compileBtn = document.getElementById('compile-btn');
         const resultsSection = document.getElementById('results-section');
+        const nextStepSection = document.querySelector('.next-step');
+        let r2ChartInstance, importanceChartInstance;
 
         compileBtn.addEventListener('click', async () => {
             setLoading(true);
             resultsSection.classList.add('hidden');
+            if (nextStepSection) nextStepSection.style.display = 'none';
+
             try {
                 const response = await fetch('/get_comparison_data', { method: 'POST' });
-                const result = await response.json();
-                if (!response.ok) { throw new Error(result.error); }
-                displayResults(result);
+                const data = await response.json();
+
+                if (!response.ok || data.error) throw new Error(data.error || 'Unexpected response');
+
+                displayResults(data);
             } catch (error) {
                 alert(`Error: ${error.message}`);
             } finally {
@@ -94,56 +117,81 @@
         });
 
         function displayResults(data) {
-            populateTable(data.summary_table);
-            createR2Chart(data.charts.accuracy_comparison);
-            createImportanceChart(data.charts.feature_importance);
+            if (!data || !data.summary_table || !data.charts) {
+                alert('Invalid data structure received from backend.');
+                return;
+            }
+            populateTable(data.summary_table || []);
+            createR2Chart(data.charts.accuracy_comparison || {});
+            createImportanceChart(data.charts.feature_importance || {});
+            populateArtifacts(data.artifacts || []);
             resultsSection.classList.remove('hidden');
+            if (nextStepSection) nextStepSection.style.display = 'block';
         }
 
-        function populateTable(tableData) {
-            const tbody = document.getElementById('summary-table').querySelector('tbody');
+        function populateTable(tableData = []) {
+            const tbody = document.querySelector('#summary-table tbody');
             tbody.innerHTML = '';
+            if (!Array.isArray(tableData)) return;
             tableData.forEach(row => {
-                const tr = tbody.insertRow();
+                const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${row.Model}</td>
-                    <td>${row.MAE}</td>
-                    <td>${row.RMSE}</td>
-                    <td>${row['R²']}</td>
-                    <td>${row['Model Size (KB)']}</td>
+                    <td>${row.Model || '-'}</td>
+                    <td>${row.MAE || '-'}</td>
+                    <td>${row.RMSE || '-'}</td>
+                    <td>${row['R²'] || '-'}</td>
+                    <td>${row['Model Size (KB)'] || '-'}</td>
                 `;
+                tbody.appendChild(tr);
             });
         }
 
-        function createR2Chart(chartData) {
+        function createR2Chart(chartData = {}) {
             const ctx = document.getElementById('r2Chart').getContext('2d');
-            new Chart(ctx, {
+            if (r2ChartInstance) r2ChartInstance.destroy();
+            r2ChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: chartData.labels,
+                    labels: chartData.labels || [],
                     datasets: [{
                         label: 'R² Score (Higher is Better)',
-                        data: chartData.r2_data,
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                        data: chartData.r2_data || [],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
-        
-        function createImportanceChart(chartData) {
+
+        function createImportanceChart(chartData = {}) {
             const ctx = document.getElementById('importanceChart').getContext('2d');
-            new Chart(ctx, {
+            if (importanceChartInstance) importanceChartInstance.destroy();
+            importanceChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: chartData.features,
+                    labels: chartData.features || [],
                     datasets: [{
                         label: 'Importance Score',
-                        data: chartData.scores,
-                        backgroundColor: '#9C27B0',
+                        data: chartData.scores || [],
+                        backgroundColor: '#9C27B0'
                     }]
                 },
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function populateArtifacts(artifacts = []) {
+            const list = document.getElementById('artifact-list');
+            list.innerHTML = '';
+            if (!Array.isArray(artifacts)) return;
+            artifacts.forEach(a => {
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `/download/${a.path}`;
+                link.textContent = `Download ${a.name}`;
+                link.className = 'artifact-link';
+                li.appendChild(link);
+                list.appendChild(li);
             });
         }
 

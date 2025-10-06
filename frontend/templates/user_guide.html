@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Guide | Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_guide.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h1>Analysis Pipeline</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Upload Data</a></li>
+                    <li><a href="/clean">Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">Fluctuation Analysis</a></li>
+                    <li><a href="/features">Feature Engineering</a></li>
+                    <li><a href="/selection">Feature Selection</a></li>
+                    <li><a href="/models">Baseline Models</a></li>
+                    <li><a href="/deep_learning">Deep Learning</a></li>
+                    <li><a href="/optimization">Optimization</a></li>
+                    <li><a href="/anomalies">Anomaly Detection</a></li>
+                    <li><a href="/wastage">Wastage Analysis</a></li>
+                    <li><a href="/comparison">Final Report</a></li>
+                    <li><a href="/deployment">Deployment</a></li>
+                    <li class="active"><a href="/user_guide">User Guide</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content-panel">
+            <header>
+                <h2>User Guide</h2>
+                <p>How to use the Building Energy Optimization application.</p>
+            </header>
+            
+            <div class="guide-content">
+                <h3>Welcome!</h3>
+                <p>This application is a full-stack data science project demonstrating an end-to-end machine learning pipeline for building energy analysis.</p>
+
+                <h3>The Analysis Pipeline</h3>
+                <p>Follow the steps in the sidebar navigation to proceed through the pipeline:</p>
+                <ol>
+                    <li><strong>Upload Data:</strong> Begin by uploading your energy consumption dataset in CSV format.</li>
+                    <li><strong>Clean & Preprocess:</strong> Automatically handle missing values, duplicates, and outliers.</li>
+                    <li><strong>Fluctuation Analysis:</strong> Visualize trends and volatility in the time-series data.</li>
+                    <li><strong>Feature Engineering:</strong> Create new, informative features like time lags and moving averages.</li>
+                    <li><strong>Feature Selection:</strong> Use machine learning to identify the most important predictive features.</li>
+                    <li><strong>Baseline Models:</strong> Train several standard machine learning models as a performance baseline.</li>
+                    <li><strong>Deep Learning:</strong> Train advanced sequence models (LSTMs) for potentially higher accuracy.</li>
+                    <li><strong>Optimization:</strong> Fine-tune the best model's hyperparameters to maximize its performance.</li>
+                    <li><strong>Anomaly Detection:</strong> Use the final model to find unusual spikes or dips in consumption.</li>
+                    <li><strong>Wastage Analysis:</strong> Identify periods of energy wastage and get actionable insights.</li>
+                    <li><strong>Final Report:</strong> View a summary of all models and download project artifacts.</li>
+                </ol>
+
+                 <h3>How to Use the Deployment Page</h3>
+                <p>Navigate to the 'Deployment' tab. This page allows you to use the final, optimized model to make live predictions. Fill in the values for each required feature in the form and click "Predict Consumption" to get a real-time prediction for the energy consumption.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
