@@ -1,11 +1,11 @@
-# ==============================================================================
+# =======================================================================
 # Main Flask Application for the Energy Analysis Pipeline
-# ==============================================================================
+# =======================================================================
 import os
-from flask import Flask, render_template, request, jsonify, send_from_directory
-from werkzeug.utils import secure_filename
 import traceback
 import numpy as np
+from flask import Flask, render_template, request, jsonify, send_from_directory
+from werkzeug.utils import secure_filename
 
 # --- Custom Function Imports ---
 from data_handler import load_and_preview_data
@@ -28,12 +28,12 @@ app = Flask(
     static_folder='../frontend/static'
 )
 
-# --- Configuration Settings ---
+# --- Configuration ---
 app.config['MAX_CONTENT_LENGTH'] = 128 * 1024 * 1024  # 128 MB
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'data')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# --- Helper to convert all NumPy floats to Python floats ---
+# --- Helper for JSON Serialization ---
 def to_serializable(obj):
     if isinstance(obj, np.generic):
         return obj.item()
@@ -43,9 +43,9 @@ def to_serializable(obj):
         return [to_serializable(i) for i in obj]
     return obj
 
-# ==============================================================================
+# =======================================================================
 # ROUTES
-# ==============================================================================
+# =======================================================================
 
 @app.route('/')
 def index():
@@ -70,6 +70,7 @@ def upload_file():
         return jsonify({'error': str(e)}), 500
 
 
+# --- Cleaning ---
 @app.route('/clean')
 def cleaning_page():
     return render_template('clean.html')
@@ -85,6 +86,7 @@ def perform_cleaning():
         return jsonify({'error': str(e)}), 500
 
 
+# --- Fluctuations ---
 @app.route('/fluctuations')
 def fluctuations_page():
     return render_template('fluctuations.html')
@@ -100,6 +102,7 @@ def get_fluctuation_data():
         return jsonify({'error': str(e)}), 500
 
 
+# --- Feature Engineering ---
 @app.route('/features')
 def features_page():
     return render_template('features.html')
@@ -115,6 +118,7 @@ def get_engineered_features():
         return jsonify({'error': str(e)}), 500
 
 
+# --- Feature Selection ---
 @app.route('/selection')
 def selection_page():
     return render_template('selection.html')
@@ -130,6 +134,7 @@ def get_selection_data():
         return jsonify({'error': str(e)}), 500
 
 
+# --- Baseline Models ---
 @app.route('/models')
 def models_page():
     return render_template('models.html')
@@ -145,6 +150,7 @@ def run_baseline_models():
         return jsonify({'error': f'Internal error: {str(e)}'}), 500
 
 
+# --- Deep Learning Models ---
 @app.route('/deep_learning')
 def deep_learning_page():
     return render_template('deep_learning.html')
@@ -160,6 +166,7 @@ def run_advanced_models():
         return jsonify({'error': f'Internal error: {str(e)}'}), 500
 
 
+# --- Optimization ---
 @app.route('/optimization')
 def optimization_page():
     return render_template('optimization.html')
@@ -175,6 +182,7 @@ def run_optimization_route():
         return jsonify({'error': str(e)}), 500
 
 
+# --- Anomaly Detection ---
 @app.route('/anomalies')
 def anomalies_page():
     return render_template('anomalies.html')
@@ -190,6 +198,7 @@ def run_anomaly_detection_route():
         return jsonify({'error': str(e)}), 500
 
 
+# --- Wastage Analysis ---
 @app.route('/wastage')
 def wastage_page():
     return render_template('wastage.html')
@@ -205,6 +214,7 @@ def run_wastage_analysis_route():
         return jsonify({'error': str(e)}), 500
 
 
+# --- Final Report / Comparison ---
 @app.route('/comparison')
 def comparison_page():
     return render_template('comparison.html')
@@ -214,12 +224,23 @@ def comparison_page():
 def get_comparison_data_route():
     try:
         data = compile_final_report()
+        if "error" not in data:
+            data["artifacts"] = [{"name": "Comparison Summary Excel", "path": "comparison_summary.xlsx"}]
         return jsonify(to_serializable(data))
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/download/<path:filename>')
+def download_file_route(filename):
+    try:
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({'error': 'File not found'}), 404
+
+
+# --- Deployment ---
 @app.route('/deployment')
 def deployment_page():
     features = get_feature_list()
@@ -237,21 +258,14 @@ def predict():
         return jsonify({'error': str(e)}), 400
 
 
+# --- User Guide ---
 @app.route('/user_guide')
 def user_guide_page():
     return render_template('user_guide.html')
 
 
-@app.route('/download/<path:filename>')
-def download_file_route(filename):
-    try:
-        return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
-    except FileNotFoundError:
-        return jsonify({'error': 'File not found'}), 404
-
-
-# ==============================================================================
+# =======================================================================
 # Main Execution
-# ==============================================================================
+# =======================================================================
 if __name__ == '__main__':
     app.run(debug=True)

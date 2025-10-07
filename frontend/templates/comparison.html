@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Final Report | Energy Analysis</title>
+
+    <!-- External Styling -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/comparison.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <div class="main-container">
+        <!-- Sidebar -->
         <aside class="sidebar">
             <h1>Analysis Pipeline</h1>
             <nav>
@@ -33,12 +39,14 @@
             </nav>
         </aside>
 
+        <!-- Main Panel -->
         <main class="content-panel">
             <header>
                 <h2>Final Results Comparison & Reporting</h2>
                 <p>Compare all trained models, visualize performance, and download key results.</p>
             </header>
 
+            <!-- Generate Button -->
             <div class="action-card">
                 <p>Click below to compile all results and generate the final report.</p>
                 <button id="compile-btn" class="action-btn">
@@ -47,6 +55,7 @@
                 </button>
             </div>
 
+            <!-- Results Section -->
             <div id="results-section" class="hidden">
                 <section class="results-table-container">
                     <h3>Combined Model Summary</h3>
@@ -76,15 +85,18 @@
                     </section>
                 </div>
 
+                <!-- ✅ Single styled Download Button -->
                 <section class="artifacts-container">
                     <h3>Downloadable Artifacts</h3>
-                    <ul id="artifact-list"></ul>
+                    <a href="/download/comparison_summary.xlsx" class="action-btn" style="display:inline-block; margin-top:10px;">
+                        Download Comparison Summary Excel
+                    </a>
                 </section>
 
-                <!-- This is the new section for the deployment link -->
+                <!-- Next Step -->
                 <section class="next-step">
                     <p>The analysis pipeline is complete. You can now proceed to the deployment page to make live predictions.</p>
-                    <a href="/deployment" class="action-btn">Go to Deployment &rarr;</a>
+                    <a href="/deployment" class="action-btn">Go to Deployment →</a>
                 </section>
             </div>
         </main>
@@ -124,7 +136,6 @@
             populateTable(data.summary_table || []);
             createR2Chart(data.charts.accuracy_comparison || {});
             createImportanceChart(data.charts.feature_importance || {});
-            populateArtifacts(data.artifacts || []);
             resultsSection.classList.remove('hidden');
             if (nextStepSection) nextStepSection.style.display = 'block';
         }
@@ -177,21 +188,6 @@
                     }]
                 },
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function populateArtifacts(artifacts = []) {
-            const list = document.getElementById('artifact-list');
-            list.innerHTML = '';
-            if (!Array.isArray(artifacts)) return;
-            artifacts.forEach(a => {
-                const li = document.createElement('li');
-                const link = document.createElement('a');
-                link.href = `/download/${a.path}`;
-                link.textContent = `Download ${a.name}`;
-                link.className = 'artifact-link';
-                li.appendChild(link);
-                list.appendChild(li);
             });
         }
 
