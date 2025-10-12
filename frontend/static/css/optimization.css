@@ -8,18 +8,18 @@
     --header-color: #FFFFFF;
     --border-color: #444444;
     --card-bg: #2A2A2A;
-    --font-family: 'Poppins', sans-serif;
-    --good-color: #32CD32;  /* Lime Green */
-    --bad-color: #FF6384;   /* Red/Pink */
+    --good-color: #32CD32;
+    --bad-color: #FF6384;
 }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-    font-family: var(--font-family); background-color: var(--background-color);
+    font-family: 'Poppins', sans-serif; background-color: var(--background-color);
     color: var(--text-color); display: flex; justify-content: center;
     align-items: center; min-height: 100vh; padding: 2rem;
 }
 .main-container {
     display: grid; grid-template-columns: 280px 1fr; width: 100%;
-    max-width: 1600px; height: 100vh; background-color: var(--primary-panel-bg);
+    max-width: 1600px; height: 90vh; background-color: var(--primary-panel-bg);
     border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 .sidebar { background-color: var(--sidebar-bg); padding: 2rem; display: flex; flex-direction: column; }
@@ -35,34 +35,51 @@ body {
 .content-panel { padding: 2rem 3rem; overflow-y: auto; }
 .content-panel header { margin-bottom: 2rem; }
 .content-panel h2 { font-size: 2.2rem; color: var(--header-color); margin-bottom: 0.5rem; }
+
+/* --- THIS IS THE FIX --- */
 .action-card {
     background-color: var(--card-bg); padding: 2rem;
     border-radius: 10px; margin-bottom: 2rem; border: 1px solid var(--border-color);
+    text-align: left; /* Aligns the "Run Optimization" button to the left */
 }
+
 .hidden { display: none; }
 #results-section h3 {
     font-size: 1.5rem; color: var(--header-color); margin-bottom: 1.5rem;
     padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);
+}
+.highlight-card {
+    background-color: var(--card-bg);
+    border-left: 5px solid var(--good-color);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+}
+.highlight-card p {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--header-color);
 }
 .results-table-container {
     background-color: var(--card-bg); padding: 2rem; border-radius: 10px;
     margin-bottom: 2rem; border: 1px solid var(--border-color);
 }
 #comparison-table { width: 100%; border-collapse: collapse; text-align: center; }
-#comparison-table th, #comparison-table td {
-    padding: 1rem; border-bottom: 1px solid var(--border-color);
-}
+#comparison-table th, #comparison-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); }
 #comparison-table th { background-color: #333; }
 #comparison-table td:first-child { text-align: left; font-weight: 600; color: var(--accent-color); }
 #comparison-table tbody tr:hover { background-color: #383838; }
-.good { color: var(--good-color); font-weight: bold; }
-.bad { color: var(--bad-color); font-weight: bold; }
+.version-tag {
+    padding: 0.2rem 0.6rem; border-radius: 15px;
+    font-size: 0.8rem; font-weight: bold; color: white;
+}
+.version-tag.baseline { background-color: var(--bad-color); }
+.version-tag.optimized { background-color: var(--good-color); }
 .chart-container {
     background-color: var(--card-bg); padding: 1.5rem; border-radius: 10px;
     border: 1px solid var(--border-color); display: flex; flex-direction: column;
 }
-.canvas-wrapper { position: relative; flex-grow: 1; height: 400px; }
-.final-step { text-align: center; }
+.canvas-wrapper { position: relative; height: 400px; }
 .action-btn {
     display: inline-block; padding: 0.8rem 1.5rem; margin-top: 1rem;
     font-size: 1rem; font-weight: 600; color: #fff;
@@ -71,7 +88,6 @@ body {
     text-decoration: none; text-align: center;
 }
 .action-btn:hover { background-color: var(--accent-hover-color); box-shadow: 0 0 15px rgba(156, 39, 176, 0.5); }
-.action-btn[disabled] { background-color: #555; cursor: not-allowed; }
 .action-btn.loading { color: transparent; cursor: not-allowed; }
 .spinner {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -80,3 +96,8 @@ body {
 }
 .action-btn.loading .spinner { opacity: 1; }
 @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.next-step {
+    margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color);
+    text-align: center; display: none;
+}
+.next-step p { margin-bottom: 1rem; }

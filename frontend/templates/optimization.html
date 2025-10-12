@@ -15,31 +15,30 @@
         <aside class="sidebar">
             <h1>Analysis Pipeline</h1>
             <nav>
-    <ul>
-        <li><a href="/">Upload Data</a></li>
-        <li><a href="/clean">Clean & Preprocess</a></li>
-        <li><a href="/fluctuations">Fluctuation Analysis</a></li>
-        <li><a href="/features">Feature Engineering</a></li>
-        <li><a href="/selection">Feature Selection</a></li>
-        <li><a href="/models">Baseline Models</a></li>
-        <li><a href="/deep_learning">Deep Learning</a></li>
-        <li><a href="/optimization">Optimization</a></li>
-        <li><a href="/anomalies">Anomaly Detection</a></li>
-        <li><a href="/wastage">Wastage Analysis</a></li>
-        <li><a href="/comparison">Final Report</a></li>
-        <li class="active"><a href="/deployment">Deployment</a></li>
-        <li><a href="/user_guide">User Guide</a></li> 
-    </ul>
-</nav>
+                <ul>
+                    <li><a href="/">Upload Data</a></li>
+                    <li><a href="/clean">Clean & Preprocess</a></li>
+                    <li><a href="/fluctuations">Fluctuation Analysis</a></li>
+                    <li><a href="/features">Feature Engineering</a></li>
+                    <li><a href="/selection">Feature Selection</a></li>
+                    <li><a href="/models">Baseline Models</a></li>
+                    <li><a href="/deep_learning">Deep Learning</a></li>
+                    <li class="active"><a href="/optimization">Optimization</a></li>
+                    <li><a href="/anomalies">Anomaly Detection</a></li>
+                    <li><a href="/wastage">Wastage Analysis</a></li>
+                    <li><a href="/comparison">Final Report</a></li>
+                    <li><a href="/deployment">Deployment</a></li>
+                </ul>
+            </nav>
         </aside>
         <main class="content-panel">
             <header>
                 <h2>Hyperparameter Optimization</h2>
-                <p>Simulating optimization to fine-tune the best model (XGBoost) for maximum performance.</p>
+                <p>Fine-tuning models to maximize performance and find the best overall solution.</p>
             </header>
             
             <div class="action-card">
-                <p>Click to run a simulated hyperparameter tuning process. This will train a new model with 'optimized' parameters and compare it to the baseline.</p>
+                <p>Click to run a simulated optimization process on the XGBoost and Hybrid models.</p>
                 <button id="optimize-btn" class="action-btn">
                     Run Optimization
                     <div class="spinner"></div>
@@ -47,30 +46,30 @@
             </div>
 
             <div id="results-section" class="hidden">
+                <section class="highlight-card">
+                    <h3>Best Overall Model</h3>
+                    <p id="winner-text"></p>
+                </section>
+                
                 <section class="results-table-container">
-                    <h3>Optimization Results: XGBoost</h3>
+                    <h3>Performance Comparison</h3>
                     <table id="comparison-table">
                         <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th>Baseline Model</th>
-                                <th>Optimized Model</th>
-                                <th>Improvement</th>
-                            </tr>
+                            <tr><th>Model</th><th>Version</th><th>MAE</th><th>RMSE</th><th>R²</th></tr>
                         </thead>
                         <tbody></tbody>
                     </table>
                 </section>
-                
+
                 <section class="chart-container">
-                    <h3>Metric Improvement Comparison</h3>
+                    <h3>Metric Improvement (MAE)</h3>
                     <div class="canvas-wrapper">
                         <canvas id="improvementChart"></canvas>
                     </div>
                 </section>
 
-                <div class="action-card final-step">
-                    <p>The optimized model shows significant improvement. You can now proceed to the final step of the analysis.</p>
+                <div class="next-step">
+                    <p>Optimization is complete. You can now use the best model to find anomalies.</p>
                     <a href="/anomalies" class="action-btn">Proceed to Anomaly Detection &rarr;</a>
                 </div>
             </div>
@@ -81,20 +80,18 @@
     document.addEventListener('DOMContentLoaded', () => {
         const optimizeBtn = document.getElementById('optimize-btn');
         const resultsSection = document.getElementById('results-section');
+        const nextStepSection = document.querySelector('.next-step');
         let improvementChart;
 
         optimizeBtn.addEventListener('click', async () => {
             setLoading(true);
             resultsSection.classList.add('hidden');
-
+            if(nextStepSection) nextStepSection.style.display = 'none';
             try {
                 const response = await fetch('/run_optimization', { method: 'POST' });
                 const result = await response.json();
-
                 if (!response.ok || result.error) { throw new Error(result.error); }
-                
                 displayResults(result);
-
             } catch (error) {
                 alert(`Error: ${error.message}`);
             } finally {
@@ -103,92 +100,55 @@
         });
 
         function displayResults(data) {
-            populateTable(data);
-            createImprovementChart(data);
+            document.getElementById('winner-text').textContent = data.best_model_summary;
+            populateTable(data.metrics);
+            createImprovementChart(data.metrics);
             resultsSection.classList.remove('hidden');
+            if(nextStepSection) nextStepSection.style.display = 'block';
         }
 
-        function populateTable(data) {
+        function populateTable(metrics) {
             const tbody = document.getElementById('comparison-table').querySelector('tbody');
             tbody.innerHTML = '';
-            
-            for(const metric of ['MAE', 'RMSE', 'R²']) {
-                const row = tbody.insertRow();
-                const improvement = data.improvement_percent[metric];
-                const isGood = (metric === 'R²' && improvement > 0) || (metric !== 'R²' && improvement > 0);
-                const colorClass = isGood ? 'good' : 'bad';
-                const arrow = isGood ? '▲' : '▼';
-
-                row.innerHTML = `
-                    <td>${metric}</td>
-                    <td>${data.before[metric]}</td>
-                    <td>${data.after[metric]}</td>
-                    <td class="${colorClass}">${arrow} ${Math.abs(improvement)}%</td>
-                `;
-            }
+            const models = ['XGBoost_Baseline', 'XGBoost_Optimized', 'Hybrid_Baseline', 'Hybrid_Optimized'];
+            models.forEach(modelKey => {
+                if (metrics[modelKey]) {
+                    const modelData = metrics[modelKey];
+                    const [modelName, version] = modelKey.split('_');
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${modelName}</td>
+                        <td><span class="version-tag ${version.toLowerCase()}">${version}</span></td>
+                        <td>${modelData.MAE}</td>
+                        <td>${modelData.RMSE}</td>
+                        <td>${modelData['R²']}</td>
+                    `;
+                }
+            });
         }
 
-        function createImprovementChart(data) {
+        function createImprovementChart(metrics) {
             const ctx = document.getElementById('improvementChart').getContext('2d');
-            if(improvementChart) {
-                improvementChart.destroy();
-            }
+            if (improvementChart) improvementChart.destroy();
             improvementChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['MAE', 'RMSE', 'R²'],
+                    labels: ['XGBoost', 'Hybrid'],
                     datasets: [
-                        {
-                            label: 'Baseline Model',
-                            data: [data.before.MAE, data.before.RMSE, data.before['R²']],
-                            backgroundColor: 'rgba(255, 99, 132, 0.7)', // Red
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Optimized Model',
-                            data: [data.after.MAE, data.after.RMSE, data.after['R²']],
-                            backgroundColor: 'rgba(50, 205, 50, 0.7)', // Green
-                            borderColor: 'rgba(50, 205, 50, 1)',
-                            borderWidth: 1
-                        }
+                        { label: 'Baseline MAE', data: [metrics.XGBoost_Baseline.MAE, metrics.Hybrid_Baseline.MAE], backgroundColor: 'rgba(255, 99, 132, 0.7)' },
+                        { label: 'Optimized MAE', data: [metrics.XGBoost_Optimized.MAE, metrics.Hybrid_Optimized.MAE], backgroundColor: 'rgba(50, 205, 50, 0.7)' }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
                         y: { 
-                            beginAtZero: true,
-                            ticks: { color: '#bbb' },
-                            grid: { color: '#444' }
-                        },
-                        x: {
-                            ticks: { color: '#bbb' },
-                            grid: { color: '#444' }
-                        }
+                            beginAtZero: false, 
+                            title: {display: true, text: 'Mean Absolute Error (Lower is Better)', color: '#E0E0E0'} 
+                        } 
                     },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#E0E0E0'
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += context.parsed.y.toFixed(3);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
+                    plugins: { legend: { labels: { color: '#E0E0E0' } } }
                 }
             });
         }
