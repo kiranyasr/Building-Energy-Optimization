@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 
 # --- Custom Function Imports ---
-from data_handler import load_and_preview_data
+from backend.data_handler import load_and_preview_data
 from data_cleaner import clean_and_summarize_data
 from feature_engineering import analyze_fluctuations
 from advanced_features import create_engineered_features
