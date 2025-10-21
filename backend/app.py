@@ -9,17 +9,17 @@ from werkzeug.utils import secure_filename
 
 # --- Custom Function Imports ---
 from backend.data_handler import load_and_preview_data
-from data_cleaner import clean_and_summarize_data
-from feature_engineering import analyze_fluctuations
-from advanced_features import create_engineered_features
-from feature_selection import select_and_reduce_features
-from baseline_modeling import train_and_evaluate_models
-from deep_learning_models import train_advanced_models
-from optimization import run_optimization
-from anomaly_detection import detect_anomalies
-from wastage_analysis import analyze_wastage_and_usage
-from reporting import compile_final_report
-from deployment_logic import get_feature_list, make_prediction
+from backend.data_cleaner import clean_and_summarize_data
+from backend.feature_engineering import analyze_fluctuations
+from backend.advanced_features import create_engineered_features
+from backend.feature_selection import select_and_reduce_features
+from backend.baseline_modeling import train_and_evaluate_models
+from backend.deep_learning_models import train_advanced_models
+from backend.optimization import run_optimization
+from backend.anomaly_detection import detect_anomalies
+from backend.wastage_analysis import analyze_wastage_and_usage
+from backend.reporting import compile_final_report
+from backend.deployment_logic import get_feature_list, make_prediction
 
 # --- Flask App Initialization ---
 app = Flask(
