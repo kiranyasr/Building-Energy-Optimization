@@ -8,4 +8,4 @@ xgboost==1.7.3
 tensorflow==2.10.0
 optuna==3.0.0
 openpyxl==3.0.10
-gunicorn
+gunicorn==21.2.0
